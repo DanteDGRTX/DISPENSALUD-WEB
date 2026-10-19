@@ -1,0 +1,7 @@
+<nav class="{{ navclass }}" aria-label="Navegación principal">
+  <a href="/?person={{ selected.id }}&vista=hoy{% if preview %}&preview=1{% endif %}" {% if section == 'hoy' %}aria-current="page"{% endif %}>{% include 'portal/icon.html' with name='home' %}<span>Mi día{% if not adult_mode %} a día{% endif %}</span></a>
+  <a href="/?person={{ selected.id }}&vista=medicamentos{% if preview %}&preview=1{% endif %}" {% if section == 'medicamentos' %}aria-current="page"{% endif %}>{% include 'portal/icon.html' with name='pill' %}<span>{% if adult_mode %}Indicaciones{% else %}Medicamentos{% endif %}</span></a>
+  {% if adult_mode %}<a href="/?person={{ selected.id }}&vista=ayuda{% if preview %}&preview=1{% endif %}" {% if section == 'ayuda' %}aria-current="page"{% endif %}>{% include 'portal/icon.html' with name='help' %}<span>Pedir ayuda</span></a>
+  {% else %}<a href="/?person={{ selected.id }}&vista=actividad" {% if section == 'actividad' %}aria-current="page"{% endif %}>{% include 'portal/icon.html' with name='activity' %}<span>Actividad{% if open_requests %}<b class="nav-count">{{ open_requests|length }}</b>{% endif %}</span></a>
+  <a href="/?person={{ selected.id }}&preview=1">{% include 'portal/icon.html' with name='person' %}<span>Vista de usuario</span></a>{% endif %}
+</nav>

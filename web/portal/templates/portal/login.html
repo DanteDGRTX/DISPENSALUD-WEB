@@ -1,0 +1,21 @@
+{% extends 'portal/base.html' %}
+{% block title %}Ingresar · DispenSalud{% endblock %}
+{% block content %}
+<div class="login-layout">
+  <section class="intro">
+    <p class="eyebrow">UN APOYO PARA CADA DÍA</p>
+    <h1>Tus horarios,<br>más claros.</h1>
+    <p class="lead">Consulta tus recordatorios o acompaña a la persona que cuidas.</p>
+    <div class="intro-note"><strong>Cada persona tiene su acceso.</strong><br>Al ingresar verás las opciones que te corresponden.</div>
+  </section>
+  <section class="surface login-card" aria-labelledby="login-title">
+    <h2 id="login-title">Bienvenido</h2>
+    <p>Ingresa con la cuenta que configuraron para ti.</p>
+    <form method="post">{% csrf_token %}
+      {{ form.non_field_errors }}
+      {% for field in form %}<div class="mb-4"><label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>{{ field }}{{ field.errors }}</div>{% endfor %}
+      <button type="submit" class="btn btn-primary w-100 btn-lg">Entrar</button>
+    </form>
+  </section>
+</div>
+{% endblock %}
