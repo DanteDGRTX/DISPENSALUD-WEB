@@ -4,6 +4,7 @@ from portal import views
 
 
 urlpatterns = [
+    path("salud/", views.health, name="health"),
     path("", views.dashboard, name="dashboard"),
     path("ingresar/", views.login_view, name="login"),
     path("salir/", views.logout_view, name="logout"),

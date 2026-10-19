@@ -31,7 +31,7 @@ class ApiAccessTests {
 
     @BeforeEach
     void prepareAccounts() {
-        for (String table : new String[]{"audit_events", "help_requests", "schedules", "medications", "auth_sessions", "care_links", "accounts"}) {
+        for (String table : new String[]{"login_attempts", "audit_events", "help_requests", "schedules", "medications", "auth_sessions", "care_links", "accounts"}) {
             database.update("DELETE FROM " + table);
         }
         String passwordHash = auth.encodePassword(PASSWORD);
@@ -39,6 +39,41 @@ class ApiAccessTests {
         database.update("INSERT INTO accounts VALUES (?, ?, ?, ?, ?)", ADULT, "adult", passwordHash, "Adult", "OLDER_ADULT");
         database.update("INSERT INTO accounts VALUES (?, ?, ?, ?, ?)", OTHER_ADULT, "other", passwordHash, "Other adult", "OLDER_ADULT");
         database.update("INSERT INTO care_links VALUES (?, ?)", CAREGIVER, ADULT);
+    }
+
+    @Test
+    void loginAttemptsAreLimitedForExistingAndUnknownAccounts() {
+        for (String username : new String[]{"adult", "unknown"}) {
+            for (int attempt = 0; attempt < 5; attempt++) {
+                assertThat(call(HttpMethod.POST, "/auth/sessions", null,
+                    Map.of("username", username, "password", "wrong-password")).getStatusCode())
+                    .isEqualTo(HttpStatus.UNAUTHORIZED);
+            }
+            assertThat(call(HttpMethod.POST, "/auth/sessions", null,
+                Map.of("username", username, "password", PASSWORD)).getStatusCode())
+                .isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
+        }
+        database.update("UPDATE login_attempts SET expires_at = ?", Timestamp.from(Instant.now().minusSeconds(1)));
+        assertThat(call(HttpMethod.POST, "/auth/sessions", null,
+            Map.of("username", "adult", "password", PASSWORD)).getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void successfulLoginClearsPreviousFailuresAndDoesNotBlockAnotherAccount() {
+        for (int attempt = 0; attempt < 4; attempt++) {
+            call(HttpMethod.POST, "/auth/sessions", null, Map.of("username", "adult", "password", "wrong"));
+        }
+        assertThat(login("caregiver")).isNotBlank();
+        assertThat(login("adult")).isNotBlank();
+        assertThat(database.queryForObject("SELECT COUNT(*) FROM login_attempts", Integer.class)).isZero();
+    }
+
+    @Test
+    void inactiveSessionsCannotBeRevivedByUsingTheirToken() {
+        String token = login("adult");
+        database.update("UPDATE auth_sessions SET last_seen_at = ?", Timestamp.from(Instant.now().minusSeconds(1801)));
+        assertThat(call(HttpMethod.GET, "/me", token, null).getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(call(HttpMethod.GET, "/me", token, null).getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test

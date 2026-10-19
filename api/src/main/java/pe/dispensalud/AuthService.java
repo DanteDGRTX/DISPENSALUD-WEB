@@ -19,15 +19,19 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class AuthService {
     private final JdbcTemplate database;
+    private final LoginAttempts attempts;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
     private final SecureRandom random = new SecureRandom();
     private final String dummyHash = encoder.encode(UUID.randomUUID().toString());
 
-    public AuthService(JdbcTemplate database) {
+    public AuthService(JdbcTemplate database, LoginAttempts attempts) {
         this.database = database;
+        this.attempts = attempts;
     }
 
     public Session login(String username, String password) {
+        String identityHash = hash(username);
+        attempts.record(identityHash);
         List<Credential> matches = database.query(
             "SELECT * FROM accounts WHERE username = ?",
             (row, number) -> new Credential(new Account(row.getObject("id", UUID.class),
@@ -37,6 +41,7 @@ public class AuthService {
         if (!encoder.matches(password, storedHash) || matches.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales incorrectas.");
         }
+        attempts.clear(identityHash);
         byte[] bytes = new byte[32];
         random.nextBytes(bytes);
         String token = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
@@ -49,6 +54,13 @@ public class AuthService {
 
     public Account findSession(String token) {
         if (token == null || token.length() > 128) {
+            return null;
+        }
+        Instant now = Instant.now();
+        int active = database.update("UPDATE auth_sessions SET last_seen_at = ? "
+            + "WHERE token_hash = ? AND expires_at > ? AND last_seen_at > ?",
+            Timestamp.from(now), hash(token), Timestamp.from(now), Timestamp.from(now.minusSeconds(1800)));
+        if (active == 0) {
             return null;
         }
         List<Account> accounts = database.query(

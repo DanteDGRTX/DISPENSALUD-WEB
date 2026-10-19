@@ -2,7 +2,7 @@ from unittest.mock import patch
 from datetime import date
 from uuid import uuid4
 
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from .forms import ScheduleForm
 
 
@@ -20,6 +20,23 @@ class PortalAccessTests(TestCase):
         client = Client(enforce_csrf_checks=True)
         response = client.post("/ingresar/", {"username": "adult", "password": "test"})
         self.assertEqual(response.status_code, 403)
+
+    def test_login_disables_unneeded_browser_permissions_and_caching(self):
+        response = self.client.get("/ingresar/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers["Permissions-Policy"], "camera=(), microphone=(), geolocation=()")
+        self.assertIn("no-store", response.headers["Cache-Control"])
+        self.assertIn("script-src 'self'", response.headers["Content-Security-Policy"])
+        self.assertIn("frame-ancestors 'none'", response.headers["Content-Security-Policy"])
+
+    @override_settings(SECURE_SSL_REDIRECT=True, SECURE_HSTS_SECONDS=3600)
+    def test_production_redirects_http_to_https(self):
+        response = self.client.get("/ingresar/")
+        self.assertEqual(response.status_code, 301)
+        self.assertEqual(response.headers["Location"], "https://testserver/ingresar/")
+        secure_response = self.client.get("/ingresar/", secure=True)
+        self.assertEqual(secure_response.status_code, 200)
+        self.assertEqual(secure_response.headers["Strict-Transport-Security"], "max-age=3600")
 
     def test_schedule_date_initial_uses_browser_date_format(self):
         form = ScheduleForm(initial={"start_date": date(2026, 10, 17)})

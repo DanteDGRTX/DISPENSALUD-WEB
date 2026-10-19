@@ -1,0 +1,17 @@
+.git
+.github
+**/.venv
+**/data
+**/target
+**/__pycache__
+**/*.pyc
+**/staticfiles
+**/.env*
+**/secrets
+**/*.log
+**/*.db
+**/*.sqlite*
+docs
+previews
+android
+firmware

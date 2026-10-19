@@ -2,7 +2,8 @@ from functools import wraps
 from urllib.parse import urlencode
 
 from django.contrib import messages
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
+from django.db import connection, DatabaseError
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -14,6 +15,19 @@ from django.views.decorators.http import require_http_methods, require_POST
 
 from .api import ApiError, request_api
 from .forms import IdentityForm, LoginForm, MedicationForm, ScheduleForm, ScheduleToggleForm
+
+
+@require_http_methods(["GET"])
+def health(request):
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            cursor.fetchone()
+        if request_api("/health", timeout=2).get("status") != "ok":
+            return JsonResponse({"status": "unavailable"}, status=503)
+    except (DatabaseError, ApiError):
+        return JsonResponse({"status": "unavailable"}, status=503)
+    return JsonResponse({"status": "ok"})
 
 
 def authenticated(view):

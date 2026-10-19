@@ -14,11 +14,13 @@
 - Solicitudes de ayuda persistentes: la persona mayor registra una solicitud y el cuidador puede marcarla como atendida. Se consultan al actualizar el panel; no hay avisos push todavía.
 - Buscador, diálogos de creación, ajuste A+ y vista previa de la persona mayor sin cambio de identidad.
 - Scripts PowerShell de inicio local y credenciales ficticias aleatorias fuera de Git.
+- Límite persistente de intentos de ingreso por cuenta, vencimiento por inactividad y cabeceras de seguridad del portal. Detalles y límites en `CUENTAS_Y_PUBLICACION.md`.
+- Preparación de despliegue restringido Docker para Render, con Java interno, Gunicorn, WhiteNoise, sesiones PostgreSQL y supervisor de procesos. Guía en `DESPLEGAR_RENDER.md`. Imagen y despliegue real todavía pendientes de comprobación.
 
 ## Pendiente
 
-- Conectar y comprobar PostgreSQL externo en Supabase. Hay configuración, todavía no un proyecto cloud conectado.
-- Alta y recuperación de cuentas, invitaciones cuidador-persona, cierre de todas las sesiones y límites de intentos de acceso.
+- Conectar y comprobar PostgreSQL externo en Supabase. Se creó el proyecto `dispensalud-demo` y se reservó el esquema privado, pero la aplicación todavía usa las bases locales; faltan credenciales JDBC y pruebas reales.
+- Alta y recuperación de cuentas, invitaciones cuidador-persona, cierre de todas las sesiones y límites de acceso por origen en el perímetro.
 - Eliminación con historial, edición de horarios existentes, días de la semana y horarios más complejos.
 - Ocurrencias persistentes de dosis y estados de dispensación/retiro. Hoy se muestran horarios programados, no confirmaciones físicas.
 - Aplicación Android Kotlin y notificaciones.
@@ -31,13 +33,14 @@
 - Código respaldado en el repositorio privado https://github.com/luisgustavosalcedo53-sys/dispensalud-proyect, rama `main`. Los accesos ficticios, claves y bases locales siguen excluidos de Git.
 
 - Compilación y empaquetado de Spring Boot completados.
-- Diez pruebas de integración de la API aprobadas: acceso anónimo, permisos, vínculos, altas, consulta diaria, validación, revocación, edición, pausa/reactivación y solicitudes de ayuda.
-- Ocho pruebas de Django aprobadas: CSRF, permisos, vista simplificada, selección autorizada, vista previa sin cambio de identidad, estado de horario y formato de fecha en el navegador.
+- Trece pruebas de integración de la API aprobadas: incluye límites de intentos, reinicio de contadores, vencimiento por inactividad y los flujos anteriores.
+- Diecinueve pruebas de Django aprobadas: incluye políticas del navegador, redirección HTTPS/HSTS, configuración PostgreSQL, filtro de demo y comprobación de salud, además de los flujos anteriores.
+- Seis pruebas del supervisor: configuración requerida, TLS sin opciones contradictorias, credenciales fuera de URL, cierre, timeout y terminación de un componente.
 - Flujo HTTP real aprobado con los servicios locales: ingreso del cuidador, alta ficticia de medicamento y horario, ingreso independiente del adulto mayor y lectura del horario guardado.
 - Pantalla de ingreso revisada visualmente en el navegador; la comprensión y accesibilidad para usuarios mayores todavía requieren evaluación con personas reales.
 - Segunda iteración comprobada mediante HTTP real: edición visible entre cuentas, pausa/reactivación y ayuda con resolución. También se agregó un medicamento y un horario ficticios usando los formularios del navegador.
 - Revisión visual en 390 × 844 y 1280 × 900; capturas en `previews/` y guía en `PROBAR_DEMO.md`. Referencia de diseño y decisiones en `DISENO.md`.
-- Se comprobó que credenciales, sesiones, claves y bases locales estén excluidas de Git. No se ha probado una conexión real a PostgreSQL/Supabase.
+- Se comprobó que credenciales, sesiones, claves y bases locales estén excluidas de Git. Se pudo administrar el proyecto nuevo de Supabase y verificar que su esquema privado no permite acceso a los roles de la Data API. La conexión JDBC de la aplicación a PostgreSQL todavía no se ha probado.
 
 ## Django y Spring Boot
 

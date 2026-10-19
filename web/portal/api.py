@@ -11,7 +11,7 @@ class ApiError(Exception):
         super().__init__(message)
 
 
-def request_api(path, token=None, method="GET", data=None):
+def request_api(path, token=None, method="GET", data=None, timeout=8):
     headers = {"Accept": "application/json"}
     if token:
         headers["Authorization"] = f"Bearer {token}"
@@ -21,7 +21,7 @@ def request_api(path, token=None, method="GET", data=None):
         payload = json.dumps(data).encode("utf-8")
     request = Request(f"{settings.API_BASE_URL}{path}", data=payload, headers=headers, method=method)
     try:
-        with urlopen(request, timeout=8) as response:
+        with urlopen(request, timeout=timeout) as response:
             body = response.read()
             return json.loads(body) if body else None
     except HTTPError as error:

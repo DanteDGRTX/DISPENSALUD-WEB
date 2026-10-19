@@ -45,6 +45,8 @@ cd ..\web
 
 ## Fases
 
+La preparación de una demo restringida en Render está en [`docs/DESPLEGAR_RENDER.md`](docs/DESPLEGAR_RENDER.md). El runtime de ese despliegue es Docker, no Node. No publicar hasta configurar secretos, PostgreSQL, certificado y comprobar la imagen y los permisos en el entorno real.
+
 1. Requisitos y estructura del repositorio.
 2. API, autenticación, permisos y persistencia.
 3. Panel del cuidador y flujo sencillo del adulto mayor.

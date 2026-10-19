@@ -2,3 +2,7 @@ Django==5.2.18
 asgiref==3.12.1
 sqlparse==0.6.0
 tzdata==2026.5
+whitenoise==6.12.0
+psycopg[binary]==3.3.6
+gunicorn==26.2.0; sys_platform != "win32"
+packaging==26.3

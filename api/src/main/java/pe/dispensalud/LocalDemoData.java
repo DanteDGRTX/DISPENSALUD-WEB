@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Profile("local")
+@Profile({"local", "demo"})
 public class LocalDemoData implements CommandLineRunner {
     private final JdbcTemplate database;
     private final AuthService auth;
