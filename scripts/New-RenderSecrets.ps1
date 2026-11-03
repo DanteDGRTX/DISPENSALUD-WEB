@@ -14,8 +14,6 @@ $values = @(
     'DJANGO_DEBUG=0'
     'DISPENSALUD_HOSTED_DEMO=1'
     ('DJANGO_SECRET_KEY=' + (New-RandomValue 32))
-    'DEMO_GATE_USER=revision'
-    ('DEMO_GATE_PASSWORD=' + (New-RandomValue 24))
     ('DISPENSALUD_DEMO_PASSWORD=' + (New-RandomValue 24))
 )
 $values | Set-Content -LiteralPath $destination -Encoding utf8

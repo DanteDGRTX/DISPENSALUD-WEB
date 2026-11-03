@@ -1,4 +1,10 @@
-# Demo restringida en Render
+# Aplicación en Render
+
+## Actualización del 3 de noviembre de 2026
+
+Por solicitud de Gustavo se retiró la ventana HTTP Basic `revision`. La portada y el formulario de ingreso son públicos. El panel y todas las operaciones de cuidado siguen exigiendo la sesión de una cuenta y sus permisos de servidor. El registro público continúa deshabilitado. Las variables antiguas `DEMO_GATE_USER` y `DEMO_GATE_PASSWORD` ya no se utilizan y pueden retirarse del servicio sin afectar los accesos personales.
+
+Las referencias a la barrera adicional en los apartados históricos siguientes describen la preparación inicial, no la configuración vigente.
 
 ## Estado y límites
 
@@ -69,7 +75,7 @@ El arranque comprueba la configuración, ejecuta las migraciones y activa explí
 
 ## Acceso y seguridad de esta demo
 
-La URL está protegida primero por HTTP Basic con `DEMO_GATE_USER` y `DEMO_GATE_PASSWORD`; luego cada persona debe ingresar a su cuenta de DispenSalud. La contraseña del filtro se comparte sólo con revisores autorizados y puede rotarse. No equivale a invitaciones individuales, MFA, protección perimetral contra fuerza bruta ni autorización para datos clínicos reales. No compartirla en una presentación pública ni en GitHub.
+La portada es pública. Cada persona ingresa a su cuenta de DispenSalud para consultar o configurar el cuidado según su rol. No existe una contraseña adicional compartida para abrir la página. Invitaciones individuales, recuperación y la preparación para datos reales siguen pendientes.
 
 `/salud/` es la excepción pública: responde sólo `ok` o `unavailable`, comprueba base y API y no expone usuarios, host, secretos o trazas. Los archivos estáticos públicos no contienen datos personales ni credenciales. Las páginas del portal llevan `no-store`. HSTS inicial de una hora, sin subdominios ni preload, es una decisión conservadora hasta verificar el dominio; `check --deploy` puede advertir esas dos opciones. Revisar las advertencias, no silenciarlas globalmente.
 
@@ -79,7 +85,7 @@ La URL está protegida primero por HTTP Basic con `DEMO_GATE_USER` y `DEMO_GATE_
 - `web/.venv/Scripts/python.exe manage.py test` desde `web` en Windows.
 - `python -m unittest discover -s deploy` desde la raíz: pruebas del supervisor.
 - Donde haya Docker: `docker build -t dispensalud-demo .`. Todavía no se puede afirmar que la imagen funcione sólo porque pasan pruebas Python/Java.
-- Tras configurar secretos y aprobar la publicación: revisar el despliegue, `GET /salud/`, HTTPS, archivos estáticos, doble ingreso, permisos entre cuentas, escritura/lectura persistente y reinicio. Medir memoria antes de ampliar acceso.
+- Tras configurar secretos y aprobar la publicación: revisar el despliegue, `GET /salud/`, HTTPS, archivos estáticos, ingreso personal, permisos entre cuentas, escritura/lectura persistente y reinicio. Medir memoria antes de ampliar acceso.
 - Si falla el build o el arranque, no cambiar a pago sin diagnóstico y autorización. Conservar logs sin contraseñas ni tokens.
 
 La autorización para subir código NO implica autorización para contratar recursos ni publicar automáticamente. Este paso no completa registro, recuperación, consentimiento, invitaciones ni protección por origen: siguen pendientes antes de una demo abierta.

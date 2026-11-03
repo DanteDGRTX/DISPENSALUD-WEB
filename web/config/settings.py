@@ -32,10 +32,6 @@ if HOSTED_DEMO:
     ALLOWED_HOSTS = [hostname]
     CSRF_TRUSTED_ORIGINS = [f"https://{hostname}"]
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-    DEMO_GATE_USER = required(os.environ, "DEMO_GATE_USER")
-    DEMO_GATE_PASSWORD = required(os.environ, "DEMO_GATE_PASSWORD")
-    if len(DEMO_GATE_PASSWORD) < 24:
-        raise ImproperlyConfigured("DEMO_GATE_PASSWORD debe tener al menos 24 caracteres.")
     if len(SECRET_KEY) < 50:
         raise ImproperlyConfigured("DJANGO_SECRET_KEY debe tener al menos 50 caracteres.")
 INSTALLED_APPS = ["django.contrib.contenttypes", "django.contrib.sessions", "django.contrib.messages", "django.contrib.staticfiles", "portal"]
@@ -43,7 +39,6 @@ MIDDLEWARE = [
     "portal.middleware.BrowserSecurityMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
-    "portal.middleware.DemoAccessMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",

@@ -26,7 +26,6 @@ class StartTests(unittest.TestCase):
     def environment(self, certificate):
         return {
             "DJANGO_SECRET_KEY": "test-only-key" * 5, "RENDER_EXTERNAL_HOSTNAME": "test.invalid",
-            "DEMO_GATE_USER": "reviewer", "DEMO_GATE_PASSWORD": "test-only-password" * 2,
             "DATABASE_JDBC_URL": f"jdbc:postgresql://test.invalid/postgres?sslmode=verify-full&sslrootcert={certificate}",
             "DATABASE_USER": "api", "DATABASE_PASSWORD": "test-only-db-password",
             "DATABASE_SSL_ROOT_CERT": str(certificate), "PORTAL_DATABASE_HOST": "test.invalid",

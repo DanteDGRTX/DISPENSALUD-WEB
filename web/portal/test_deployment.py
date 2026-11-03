@@ -1,4 +1,3 @@
-import base64
 from unittest.mock import patch
 
 from django.core.exceptions import ImproperlyConfigured
@@ -22,27 +21,33 @@ class DatabaseConfigurationTests(SimpleTestCase):
         self.assertEqual(configuration["ENGINE"], "django.db.backends.postgresql")
 
 
-@override_settings(HOSTED_DEMO=True, DEMO_GATE_USER="reviewer", DEMO_GATE_PASSWORD="test-only-demo-password-12345")
-class RestrictedDemoTests(TestCase):
-    def basic_header(self, password="test-only-demo-password-12345"):
-        return "Basic " + base64.b64encode(f"reviewer:{password}".encode()).decode()
+@override_settings(HOSTED_DEMO=True, REGISTRATION_ENABLED=False)
+class HostedAccessTests(TestCase):
+    def test_public_home_and_login_do_not_request_browser_credentials(self):
+        for path in ("/", "/ingresar/"):
+            response = self.client.get(path)
+            self.assertEqual(response.status_code, 200)
+            self.assertNotIn("WWW-Authenticate", response.headers)
+            self.assertIn("no-store", response.headers["Cache-Control"])
 
-    def test_demo_login_is_not_accessible_without_gate_credentials(self):
-        response = self.client.get("/ingresar/")
-        self.assertEqual(response.status_code, 401)
-        self.assertIn("Basic", response.headers["WWW-Authenticate"])
-        self.assertIn("no-store", response.headers["Cache-Control"])
-
-    def test_gate_does_not_replace_individual_account_login(self):
-        response = self.client.get("/panel/", HTTP_AUTHORIZATION=self.basic_header())
+    def test_panel_still_requires_individual_account_login(self):
+        response = self.client.get("/panel/")
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.headers["Location"], "/ingresar/")
-        self.assertEqual(self.client.get("/ingresar/", HTTP_AUTHORIZATION=self.basic_header()).status_code, 200)
 
-    def test_invalid_credentials_and_malformed_authorization_are_denied(self):
-        for value in (self.basic_header("wrong"), "Basic !!!", "Basic /w==", "Bearer unrelated-token", "Basic " + "A" * 3000):
-            with self.subTest(value=value[:20]):
-                self.assertEqual(self.client.get("/ingresar/", HTTP_AUTHORIZATION=value).status_code, 401)
+    def test_basic_header_does_not_grant_account_permissions(self):
+        response = self.client.get("/panel/", HTTP_AUTHORIZATION="Basic cmV2aXNpb246dW51c2Vk")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.headers["Location"], "/ingresar/")
+
+    def test_public_registration_remains_disabled(self):
+        response = self.client.post("/cuenta/crear/", {})
+        self.assertEqual(response.status_code, 403)
+
+    def test_login_retains_browser_security_headers(self):
+        response = self.client.get("/ingresar/")
+        self.assertEqual(response.headers["X-Frame-Options"], "DENY")
+        self.assertIn("frame-ancestors 'none'", response.headers["Content-Security-Policy"])
 
     @patch("portal.views.request_api", return_value={"status": "ok"})
     def test_health_check_is_public_and_has_no_sensitive_details(self, api):
@@ -65,7 +70,7 @@ class RestrictedDemoTests(TestCase):
 
     @override_settings(SECURE_SSL_REDIRECT=True, SECURE_PROXY_SSL_HEADER=("HTTP_X_FORWARDED_PROTO", "https"))
     def test_render_https_proxy_does_not_create_a_redirect_loop(self):
-        response = self.client.get("/ingresar/", HTTP_AUTHORIZATION=self.basic_header(), HTTP_X_FORWARDED_PROTO="https")
+        response = self.client.get("/ingresar/", HTTP_X_FORWARDED_PROTO="https")
         self.assertEqual(response.status_code, 200)
 
     @override_settings(SECURE_SSL_REDIRECT=True)

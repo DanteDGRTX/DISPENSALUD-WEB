@@ -1,5 +1,7 @@
 # Dispensalud proyect — punto para retomar
 
+Actualización de acceso del 3 de noviembre: se retiró la ventana del navegador `revision` por solicitud de Gustavo. La portada es pública y los paneles conservan el inicio de sesión personal y sus permisos. Se cambiaron las contraseñas de las dos cuentas demo alojadas; no escribirlas en Git ni suponer que coinciden con la variable de creación inicial de cuentas. El registro público permanece cerrado. Ver `docs/ACCESO_PERSONAL.md`.
+
 ## Último incremento: interfaz del equipo, noviembre de 2026
 
 Actualizado el 3 de noviembre: paneles de cuidador y persona usuaria unificados con la portada azul oscuro; etiquetas de evaluación retiradas; limpieza selectiva del contenido inicial con V4. 58 pruebas aprobadas. Revisar `docs/INTEGRACION_INTERFAZ.md` y las capturas `previews/panel-*.png`. Aplicación local activa en http://127.0.0.1:8000/panel/ al terminar esta sesión. La nube conserva el despliegue anterior.
