@@ -1,4 +1,26 @@
 from django import forms
+from django.core.validators import RegexValidator
+
+
+class RegistrationForm(forms.Form):
+    display_name = forms.CharField(label="Tu nombre", max_length=120)
+    username = forms.CharField(label="Nombre de usuario", min_length=4, max_length=40,
+        validators=[RegexValidator(r"^[a-zA-Z0-9._-]+$", "Usa letras sin tildes, números, punto, guion o guion bajo.")])
+    role = forms.ChoiceField(label="¿Cómo usarás DispenSalud?", choices=(("OLDER_ADULT", "Persona usuaria"), ("CAREGIVER", "Cuidador o familiar")))
+    password = forms.CharField(label="Contraseña", min_length=12, max_length=60, widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}))
+    password_confirmation = forms.CharField(label="Repite la contraseña", widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}))
+    accept = forms.BooleanField(label="Confirmo que esta cuenta es personal y que mantendré mi contraseña privada.")
+
+    def clean_username(self):
+        return self.cleaned_data["username"].lower()
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get("password") != cleaned.get("password_confirmation"):
+            self.add_error("password_confirmation", "Las contraseñas no coinciden.")
+        if len(cleaned.get("password", "").encode("utf-8")) > 72:
+            self.add_error("password", "La contraseña excede el tamaño admitido. Usa menos caracteres.")
+        return cleaned
 
 
 class LoginForm(forms.Form):

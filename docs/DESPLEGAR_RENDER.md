@@ -37,6 +37,18 @@ No usar `yarn`, `yarn start`, `runserver` ni copiar comandos locales PowerShell 
 
 ## Variables y archivo secreto
 
+### Asistente local para los usuarios de la demo
+
+Desde una terminal interactiva PowerShell de VS Code, ejecutar `scripts/Prepare-Supabase.ps1`. El asistente pide confirmación explícita para crear `dispensalud_api_demo` y `dispensalud_portal_demo`, después solicita la contraseña de `postgres` con entrada oculta. No ejecutarlo por una herramienta del chat ni pegar esa contraseña en comandos. No modifica la contraseña administradora ni la guarda.
+
+El script conecta por Session pooler verificando TLS con `data/supabase-ca.crt`, genera dos contraseñas aleatorias distintas y concede conexión y USAGE/CREATE únicamente sobre el esquema correspondiente. Son usuarios con permisos de migración para ESTA demo, no la separación definitiva entre migrador y ejecución. No les concede superusuario, creación de bases/roles, replicación ni bypass RLS; tampoco membresía en roles administradores. Los privilegios generales heredados de PUBLIC en el resto de Supabase requieren una revisión independiente antes de datos reales.
+
+Si los nombres ya existen, no rota sus contraseñas ni cambia sus permisos. Si no existen los esquemas o aparece acceso cruzado entre ellos, cancela la transacción. Guarda las claves generadas primero en `data/render-database.pending` y sólo después de confirmar la creación y comprobar las conexiones de ambos usuarios cambia el nombre a `data/render-database.env`. Si hay un fallo o interrupción, no borrar un archivo pendiente ni volver a ejecutar a ciegas: puede contener las únicas credenciales de un commit cuyo resultado se desconoce. Conservarlo localmente y revisar el estado; nunca compartirlo en el chat.
+
+Cuando el asistente informe éxito, importar el contenido de `data/render-database.env` en Environment Variables de Render. Son exactamente `DATABASE_USER`, `DATABASE_PASSWORD`, `PORTAL_DATABASE_USER` y `PORTAL_DATABASE_PASSWORD`. No sustituirlas por la cuenta `postgres` ni subir los archivos generados a Git. El asistente todavía no ejecuta migraciones, no inicia la aplicación contra Supabase y no demuestra que la imagen Docker funcione.
+
+Las cinco pruebas unitarias del asistente verifican la configuración TLS, ausencia de credenciales administradoras en el archivo generado, rechazo de roles existentes/esquemas ausentes y detección de acceso cruzado. No son una prueba real de creación en PostgreSQL: esa comprobación requiere que el propietario ejecute el asistente y escriba su contraseña en su propia terminal.
+
 Además de `data/render.env`, configurar:
 
 | Variable | Contenido |

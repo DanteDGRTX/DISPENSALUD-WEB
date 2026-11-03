@@ -36,6 +36,8 @@ Abre http://127.0.0.1:8000 e ingresa como `cuidador.demo` o `usuario.demo` con l
 
 ## Comprobar
 
+La interfaz integrada del equipo tiene portada en `/`, ingreso en `/ingresar/`, registro de evaluación en `/cuenta/crear/` y panel en `/panel/`. El registro se permite en desarrollo local y queda cerrado por defecto en cloud. No concede vínculos automáticamente. Leer `docs/INTEGRACION_INTERFAZ.md` y el informe consolidado antes de publicar este incremento.
+
 ```powershell
 cd api
 mvn test

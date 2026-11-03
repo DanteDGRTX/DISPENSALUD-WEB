@@ -1,0 +1,30 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="DispenSalud: tecnología y acompañamiento para organizar los horarios de medicación. Proyecto de innovación tecnológica TECSUP.">
+  <title>{% block title %}DispenSalud · Tecnología y cuidado{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'portal/product/reference.css' %}">
+  <link rel="stylesheet" href="{% static 'portal/product/integration.css' %}">
+  <script src="{% static 'portal/product/site.js' %}" defer></script>
+</head>
+<body class="site-body">
+<a class="skip-link" href="#main-content">Saltar al contenido</a>
+<header class="site-header" id="site-header">
+  <div class="header-top-strip"><div class="container header-strip-inner"><div class="tecsup-identity"><span class="tecsup-badge">TECSUP</span><span class="tecsup-project-label">Proyecto de innovación tecnológica</span></div><span class="prototype-status-pill"><span class="status-dot" aria-hidden="true"></span>Tecnología para acompañar</span></div></div>
+  <div class="container navbar-container">
+    <a href="{% url 'home' %}" class="brand-logo brand-lockup" aria-label="DispenSalud, volver al inicio"><img src="{% static 'portal/product/images/brand-lockup.png' %}" alt="DispenSalud y TECSUP" width="387" height="64"></a>
+    <nav class="main-nav" aria-label="Principal"><ul class="nav-list"><li><a class="nav-link" href="{% url 'home' %}#inicio">Inicio</a></li><li><a class="nav-link" href="{% url 'home' %}#producto">Producto</a></li><li><a class="nav-link" href="{% url 'home' %}#beneficios">Beneficios</a></li><li><a class="nav-link" href="{% url 'home' %}#funcionamiento">Cómo funciona</a></li><li><a class="nav-link" href="{% url 'home' %}#galeria">Galería</a></li></ul></nav>
+    <div class="header-actions"><a class="btn btn-primary account-header" href="{% if request.session.api_token %}{% url 'dashboard' %}{% else %}{% url 'login' %}{% endif %}">{% if request.session.api_token %}Mi panel{% else %}Mi cuenta{% endif %}<span aria-hidden="true">↗</span></a><button type="button" class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-drawer"><span class="hamburger-bar"></span><span class="hamburger-bar"></span><span class="hamburger-bar"></span></button></div>
+  </div>
+  <div class="mobile-drawer" id="mobile-drawer" hidden><nav class="container mobile-drawer-inner" aria-label="Menú móvil"><a href="{% url 'home' %}#producto">Producto</a><a href="{% url 'home' %}#beneficios">Beneficios</a><a href="{% url 'home' %}#funcionamiento">Cómo funciona</a><a href="{% url 'home' %}#galeria">Galería</a><a href="{% url 'login' %}">Ingresar a mi cuenta</a><a href="{% url 'register' %}">Crear una cuenta</a></nav></div>
+</header>
+<main id="main-content" tabindex="-1">
+  {% for message in messages %}<div class="container"><p class="integration-notice" role="status">{{ message }}</p></div>{% endfor %}
+  {% block content %}{% endblock %}
+</main>
+<footer class="integration-footer"><div class="container footer-grid"><div><a class="footer-brand" href="{% url 'home' %}">DispenSalud<span> Tecnología y cuidado.</span></a><p>Una iniciativa del equipo para acompañar el cuidado en el hogar.</p></div><div><a href="{% url 'login' %}">Mi cuenta</a><a href="{% url 'register' %}">Crear cuenta</a><a href="{% url 'home' %}#especificaciones">Estado del proyecto</a></div></div><div class="container footer-bottom"><span>DispenSalud · Tecnología y cuidado</span><span>No sustituye la indicación ni la supervisión profesional.</span></div></footer>
+</body>
+</html>

@@ -34,7 +34,7 @@ class RestrictedDemoTests(TestCase):
         self.assertIn("no-store", response.headers["Cache-Control"])
 
     def test_gate_does_not_replace_individual_account_login(self):
-        response = self.client.get("/", HTTP_AUTHORIZATION=self.basic_header())
+        response = self.client.get("/panel/", HTTP_AUTHORIZATION=self.basic_header())
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.headers["Location"], "/ingresar/")
         self.assertEqual(self.client.get("/ingresar/", HTTP_AUTHORIZATION=self.basic_header()).status_code, 200)

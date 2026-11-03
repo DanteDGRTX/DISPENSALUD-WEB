@@ -1,5 +1,11 @@
 # Dispensalud proyect — punto para retomar
 
+## Último incremento: interfaz del equipo, noviembre de 2026
+
+Actualizado el 3 de noviembre: paneles de cuidador y persona usuaria unificados con la portada azul oscuro; etiquetas de evaluación retiradas; limpieza selectiva del contenido inicial con V4. 58 pruebas aprobadas. Revisar `docs/INTEGRACION_INTERFAZ.md` y las capturas `previews/panel-*.png`. Aplicación local activa en http://127.0.0.1:8000/panel/ al terminar esta sesión. La nube conserva el despliegue anterior.
+
+Leer primero `docs/INTEGRACION_INTERFAZ.md`. Portada del aporte APAG integrada, Mi cuenta separada y registro local controlado en la API. Panel trasladado a `/panel/`, manteniendo compatibilidad con marcadores anteriores. 56 pruebas aprobadas y prueba HTTP real local. Esta integración está en la carpeta local y el respaldo, NO publicada en Render ni enviada a GitHub. Rotación de las claves compartidas anteriormente sigue pendiente; no escribirlas en documentación ni en el chat. Los estados y pendientes de apartados antiguos deben leerse como historial, no como verificación actual de la nube.
+
 El código está guardado en esta carpeta. Abre `DispenSalud.code-workspace` en Visual Studio Code.
 
 ## Acuerdos del proyecto
@@ -30,6 +36,8 @@ Desde esta carpeta, en dos terminales PowerShell:
 Abre http://127.0.0.1:8000. Si los servicios ya están ejecutándose, basta con abrir esa dirección. Los accesos ficticios de esta laptop están en `data/acceso-local.json`, excluido de Git y del ZIP. Al extraer el ZIP en una carpeta nueva, el script de la API genera nuevos accesos locales.
 
 ## Próximos pasos
+
+Se preparó un asistente local adicional en `scripts/Prepare-Supabase.ps1` y `scripts/prepare_supabase.py` para crear y verificar dos usuarios limitados de la demo sin guardar ni compartir la contraseña administradora. Cinco pruebas unitarias aprobadas. Este asistente aún NO se ejecutó contra Supabase: requiere entrada oculta del propietario en una terminal local. No asumir que ya existen los usuarios ni que está conectado el portal. Archivos del asistente y esta documentación están pendientes de respaldo remoto; los secretos generados seguirán fuera de Git.
 
 Preparación Render en `docs/DESPLEGAR_RENDER.md`: Docker de Django/Gunicorn + API Java interna, sesiones PostgreSQL separadas, control HTTP Basic adicional para una demo restringida, comprobación de salud y cierre coordinado. Se generó `data/render.env` local, ignorado por Git y Docker. Faltan credenciales JDBC/portal, certificado, build real Docker y prueba del despliegue. El propietario autorizó commit y push de este incremento, NO contratar recursos ni publicar automáticamente.
 

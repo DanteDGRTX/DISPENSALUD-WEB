@@ -43,7 +43,7 @@ class PortalAccessTests(TestCase):
         self.assertIn('value="2026-10-17"', str(form["start_date"]))
 
     def test_anonymous_visits_redirect_to_login(self):
-        self.assertRedirects(self.client.get("/"), "/ingresar/", fetch_redirect_response=False)
+        self.assertRedirects(self.client.get("/panel/"), "/ingresar/", fetch_redirect_response=False)
 
     @patch("portal.views.request_api")
     def test_older_adult_direct_configuration_post_is_forbidden(self, api):
@@ -60,8 +60,11 @@ class PortalAccessTests(TestCase):
             {"id": self.person_id, "role": "OLDER_ADULT", "displayName": "Test adult"},
             [{"id": self.person_id, "displayName": "Test adult"}], [], {"doses": []}, [], [], [],
         ]
-        response = self.client.get("/")
+        response = self.client.get("/panel/")
         self.assertContains(response, "Mi horario de hoy")
+        self.assertContains(response, "care-app")
+        self.assertContains(response, "product/panel.css")
+        self.assertNotContains(response, "Versión de evaluación")
         self.assertNotContains(response, "Agregar medicamento")
 
     @patch("portal.views.request_api")
@@ -71,7 +74,7 @@ class PortalAccessTests(TestCase):
             {"id": str(uuid4()), "role": "CAREGIVER", "displayName": "Test caregiver"},
             [{"id": self.person_id, "displayName": "Test adult"}],
         ]
-        response = self.client.get("/", {"person": str(uuid4())})
+        response = self.client.get("/panel/", {"person": str(uuid4())})
         self.assertEqual(response.status_code, 403)
 
     @patch("portal.views.request_api")
@@ -79,7 +82,7 @@ class PortalAccessTests(TestCase):
         self.sign_in_session()
         account = {"id": str(uuid4()), "role": "CAREGIVER", "displayName": "Caregiver"}
         api.side_effect = [account, [{"id": self.person_id, "displayName": "Test adult"}], [], {"doses": []}, [], [], []]
-        response = self.client.get("/", {"preview": "1", "vista": "ayuda"})
+        response = self.client.get("/panel/", {"preview": "1", "vista": "ayuda"})
         self.assertContains(response, "Vista previa")
         self.assertNotContains(response, 'action="/ayuda/solicitar/"')
         api.side_effect = None

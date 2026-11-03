@@ -1,5 +1,9 @@
 # Estado real del primer incremento
 
+## Actualización de noviembre de 2026
+
+El despliegue anterior se verificó en octubre y el usuario confirmó su funcionamiento. Los apuntes que indican nube sin conectar corresponden a etapas anteriores. La nueva portada, Mi cuenta y registro de desarrollo se describen en `INTEGRACION_INTERFAZ.md`: implementados y probados localmente, todavía sin nuevo despliegue. Total actual: 56 pruebas automatizadas aprobadas. Registro público completo, correo, recuperación, vínculos por invitación y hardware siguen pendientes. Ver el informe PDF del respaldo para el estado consolidado.
+
 ## Implementado y comprobable localmente
 
 - API Spring Boot con inicio de sesión, tokens aleatorios guardados como hash, vencimiento y revocación.

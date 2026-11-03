@@ -2,6 +2,7 @@ from functools import wraps
 from urllib.parse import urlencode
 
 from django.contrib import messages
+from django.conf import settings
 from django.http import HttpResponseForbidden, JsonResponse
 from django.db import connection, DatabaseError
 from django.shortcuts import redirect, render
@@ -14,7 +15,33 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_http_methods, require_POST
 
 from .api import ApiError, request_api
-from .forms import IdentityForm, LoginForm, MedicationForm, ScheduleForm, ScheduleToggleForm
+from .forms import IdentityForm, LoginForm, MedicationForm, ScheduleForm, ScheduleToggleForm, RegistrationForm
+from .product import PRODUCT_PARTS, PRODUCT_SPECS, GALLERY
+
+
+@require_http_methods(["GET"])
+def home(request):
+    if request.session.get("api_token") and any(key in request.GET for key in ("person", "vista", "preview")):
+        return redirect(f"{reverse('dashboard')}?{request.GET.urlencode()}")
+    return render(request, "portal/home.html", {"parts": PRODUCT_PARTS, "specs": PRODUCT_SPECS, "gallery": GALLERY})
+
+
+@require_http_methods(["GET", "POST"])
+@never_cache
+def register_view(request):
+    form = RegistrationForm(request.POST or None)
+    if request.method == "POST" and not settings.REGISTRATION_ENABLED:
+        return HttpResponseForbidden("El registro no está habilitado en este entorno.")
+    if request.method == "POST" and form.is_valid():
+        values = form.cleaned_data
+        try:
+            request_api("/auth/accounts", method="POST", data={"username": values["username"],
+                "displayName": values["display_name"], "role": values["role"], "password": values["password"]})
+            messages.success(request, "Cuenta creada. Ingresa para continuar. El acceso a otra persona requiere una vinculación autorizada.")
+            return redirect("login")
+        except ApiError as error:
+            form.add_error(None, "Ese nombre de usuario no está disponible." if error.status == 409 else str(error))
+    return render(request, "portal/register.html", {"form": form, "registration_enabled": settings.REGISTRATION_ENABLED})
 
 
 @require_http_methods(["GET"])
@@ -64,7 +91,7 @@ def login_view(request):
             return redirect("dashboard")
         except ApiError as error:
             form.add_error(None, str(error))
-    return render(request, "portal/login.html", {"form": form})
+    return render(request, "portal/account_login.html", {"form": form})
 
 
 @require_POST

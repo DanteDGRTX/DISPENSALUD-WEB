@@ -7,14 +7,15 @@
   <title>{% block title %}DispenSalud{% endblock %}</title>
   <link href="{% static 'portal/vendor/bootstrap.min.css' %}" rel="stylesheet">
   <link href="{% static 'portal/app.css' %}" rel="stylesheet">
+  <link href="{% static 'portal/product/panel.css' %}" rel="stylesheet">
   <script src="{% static 'portal/app.js' %}" defer></script>
 </head>
-<body class="{% if request.session.api_token %}signed-in{% endif %} {% block bodyclass %}{% endblock %}">
+<body class="care-app {% if request.session.api_token %}signed-in{% endif %} {% block bodyclass %}{% endblock %}">
   <a class="skip-link" href="#contenido">Ir al contenido</a>
   <header class="site-header">
     <div class="container header-inner">
-      <a class="brand" href="{% url 'dashboard' %}"><span class="brand-icon" aria-hidden="true">+</span> DispenSalud</a>
-      {% if request.session.api_token %}<div class="header-actions"><span class="demo-badge">Datos ficticios</span>
+      <a class="brand panel-brand" href="{% url 'home' %}" aria-label="DispenSalud, volver al inicio"><img src="{% static 'portal/product/images/brand-lockup.png' %}" alt="DispenSalud y TECSUP" width="387" height="64"></a>
+      {% if request.session.api_token %}<div class="header-actions"><a class="btn btn-quiet" href="{% url 'home' %}">Inicio</a>
       {% if adult_mode %}<button type="button" class="font-button" data-font-size aria-label="Aumentar el tamaño del texto" aria-pressed="false">A+</button>{% endif %}
       <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="btn btn-quiet" type="submit">Salir</button></form></div>
       {% endif %}
@@ -23,11 +24,12 @@
   <div class="{% if request.session.api_token %}app-frame{% else %}container{% endif %}">
   {% if request.session.api_token %}<aside class="sidebar"><p class="sidebar-label">{% if adult_mode %}MI ESPACIO{% else %}ACOMPAÑAR Y CUIDAR{% endif %}</p>{% include 'portal/nav.html' with navclass='desktop-nav' %}<div class="sidebar-note">{% include 'portal/icon.html' with name='device' %}<strong>Tu dispensador</strong><p>Vinculación pendiente</p><span>Por ahora puedes organizar y consultar tus horarios.</span></div></aside>{% endif %}
   <main id="contenido" class="app-content" tabindex="-1">
+    {% if account %}<div class="panel-context"><span class="account-role">{% if preview %}Vista de usuario{% elif adult_mode %}Mi espacio personal{% else %}Panel del cuidador{% endif %}</span><a class="panel-refresh" href="{{ request.get_full_path }}">{% include 'portal/icon.html' with name='clock' %} Actualizar{% if now %}<span> · {{ now|date:'H:i' }}</span>{% endif %}</a></div>{% endif %}
     {% if preview %}<div class="preview-banner">Vista previa de la persona mayor. Tu cuenta sigue siendo de cuidador. <a href="/?person={{ selected.id }}">Volver al panel</a></div>{% endif %}
     {% for message in messages %}<p class="notice" role="status">{{ message }}</p>{% endfor %}
     {% block content %}{% endblock %}
   </main></div>
   {% if request.session.api_token %}{% include 'portal/nav.html' with navclass='bottom-nav' %}{% endif %}
-  <footer class="container footer-note">Prototipo con datos ficticios · Los horarios se muestran en hora de Perú.</footer>
+  <footer class="container footer-note">DispenSalud · Tus horarios, siempre claros. <span>Hora de Perú</span></footer>
 </body>
 </html>

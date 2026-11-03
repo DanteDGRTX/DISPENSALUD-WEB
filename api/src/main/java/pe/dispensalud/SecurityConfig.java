@@ -26,6 +26,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(routes -> routes
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/sessions").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/auth/accounts").permitAll()
                 .requestMatchers("/api/v1/health").permitAll()
                 .anyRequest().authenticated())
             .exceptionHandling(errors -> errors.authenticationEntryPoint((request, response, exception) -> {

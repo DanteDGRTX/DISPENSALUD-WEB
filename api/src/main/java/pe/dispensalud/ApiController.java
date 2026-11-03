@@ -18,11 +18,23 @@ import org.springframework.web.bind.annotation.*;
 public class ApiController {
     private final AuthService auth;
     private final CareService care;
+    private final RegistrationService registration;
 
-    public ApiController(AuthService auth, CareService care) {
+    public ApiController(AuthService auth, CareService care, RegistrationService registration) {
         this.auth = auth;
         this.care = care;
+        this.registration = registration;
     }
+
+    @PostMapping("/auth/accounts")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Account register(@Valid @RequestBody RegistrationInput input) {
+        return registration.register(input.username(), input.displayName(), input.role(), input.password());
+    }
+
+    public record RegistrationInput(@NotBlank @Size(max = 40) String username,
+        @NotBlank @Size(max = 120) String displayName, @NotBlank @Size(max = 20) String role,
+        @NotBlank @Size(min = 12, max = 60) String password) { }
 
     @GetMapping("/health")
     public Map<String, String> health() {

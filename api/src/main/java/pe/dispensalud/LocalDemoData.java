@@ -38,12 +38,12 @@ public class LocalDemoData implements CommandLineRunner {
         UUID adult = UUID.randomUUID();
         UUID medication = UUID.randomUUID();
         database.update("INSERT INTO accounts VALUES (?, ?, ?, ?, ?)", caregiver,
-            "cuidador.demo", auth.encodePassword(password), "Cuidadora de prueba", "CAREGIVER");
+            "cuidador.demo", auth.encodePassword(password), "Cuidadora", "CAREGIVER");
         database.update("INSERT INTO accounts VALUES (?, ?, ?, ?, ?)", adult,
-            "usuario.demo", auth.encodePassword(password), "Elena (persona ficticia)", "OLDER_ADULT");
+            "usuario.demo", auth.encodePassword(password), "Elena", "OLDER_ADULT");
         database.update("INSERT INTO care_links VALUES (?, ?)", caregiver, adult);
         database.update("INSERT INTO medications(id, person_id, name, instructions) VALUES (?, ?, ?, ?)",
-            medication, adult, "Ejemplo ficticio A", "Demostracion de pantalla. No corresponde a un tratamiento real.");
+            medication, adult, "Medicamento A", "Consulta las indicaciones registradas por tu cuidador.");
         database.update("INSERT INTO schedules(id, medication_id, local_time, start_date) VALUES (?, ?, ?, ?)",
             UUID.randomUUID(), medication, java.sql.Time.valueOf("09:00:00"),
             Date.valueOf(LocalDate.now(ZoneId.of("America/Lima"))));

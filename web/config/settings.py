@@ -9,6 +9,7 @@ from .deployment import postgres_database, required
 BASE_DIR = Path(__file__).resolve().parent.parent
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
 HOSTED_DEMO = os.environ.get("DISPENSALUD_HOSTED_DEMO", "0") == "1"
+REGISTRATION_ENABLED = os.environ.get("DISPENSALUD_REGISTRATION_ENABLED", "1" if DEBUG and not HOSTED_DEMO else "0") == "1"
 if HOSTED_DEMO and DEBUG:
     raise ImproperlyConfigured("La demo alojada no admite DJANGO_DEBUG=1.")
 DATA_DIR = BASE_DIR / "data"

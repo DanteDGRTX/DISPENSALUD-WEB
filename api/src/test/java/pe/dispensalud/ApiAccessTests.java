@@ -17,7 +17,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = "dispensalud.registration.enabled=true")
 @ActiveProfiles("test")
 class ApiAccessTests {
     private static final UUID CAREGIVER = UUID.fromString("10000000-0000-0000-0000-000000000001");
@@ -74,6 +75,59 @@ class ApiAccessTests {
         database.update("UPDATE auth_sessions SET last_seen_at = ?", Timestamp.from(Instant.now().minusSeconds(1801)));
         assertThat(call(HttpMethod.GET, "/me", token, null).getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThat(call(HttpMethod.GET, "/me", token, null).getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void registrationHashesPasswordAndCreatesNoCareLinks() {
+        var response = call(HttpMethod.POST, "/auth/accounts", null, Map.of("username", "New.Caregiver",
+            "displayName", "Nueva cuidadora", "role", "CAREGIVER", "password", PASSWORD));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody().get("username").asText()).isEqualTo("new.caregiver");
+        assertThat(response.getBody().has("passwordHash")).isFalse();
+        assertThat(database.queryForObject("SELECT password_hash FROM accounts WHERE username = 'new.caregiver'", String.class)).isNotEqualTo(PASSWORD);
+        String token = login("new.caregiver");
+        assertThat(call(HttpMethod.GET, "/people", token, null).getBody()).isEmpty();
+        assertThat(call(HttpMethod.GET, "/people/" + ADULT + "/medications", token, null).getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    void registrationRejectsDuplicatePrivilegedRoleAndShortPassword() {
+        var values = Map.of("username", "adult", "displayName", "Test", "role", "OLDER_ADULT", "password", PASSWORD);
+        assertThat(call(HttpMethod.POST, "/auth/accounts", null, values).getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(call(HttpMethod.POST, "/auth/accounts", null, Map.of("username", "admin", "displayName", "Test",
+            "role", "ADMIN", "password", PASSWORD)).getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(call(HttpMethod.POST, "/auth/accounts", null, Map.of("username", "short", "displayName", "Test",
+            "role", "OLDER_ADULT", "password", "short")).getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void registrationCanBeClosedOnTheServerRegardlessOfFrontend() {
+        RegistrationService closed = new RegistrationService(database, auth, false);
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> closed.register("test.new", "Test", "OLDER_ADULT", PASSWORD))
+            .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+            .hasMessageContaining("403");
+    }
+
+    @Test
+    void refreshOfInitialDisplayContentIsTargetedAndRepeatable() {
+        database.update("UPDATE accounts SET username = 'usuario.demo', display_name = 'Elena (persona ficticia)' WHERE id = ?", ADULT);
+        database.update("UPDATE accounts SET display_name = 'Nombre personal' WHERE id = ?", OTHER_ADULT);
+        UUID example = UUID.randomUUID();
+        UUID personal = UUID.randomUUID();
+        database.update("INSERT INTO medications(id, person_id, name, instructions) VALUES (?, ?, ?, ?)",
+            example, ADULT, "Ejemplo ficticio A", "Demostracion de pantalla. No corresponde a un tratamiento real.");
+        database.update("INSERT INTO medications(id, person_id, name, instructions) VALUES (?, ?, ?, ?)",
+            personal, ADULT, "Registro personal", "Contenido registrado por el cuidador");
+        var script = new org.springframework.jdbc.datasource.init.ResourceDatabasePopulator(
+            new org.springframework.core.io.ClassPathResource("db/migration/V4__refresh_initial_display_content.sql"));
+        script.setSqlScriptEncoding("UTF-8");
+        script.execute(database.getDataSource());
+        script.execute(database.getDataSource());
+        assertThat(database.queryForObject("SELECT display_name FROM accounts WHERE id = ?", String.class, ADULT)).isEqualTo("Elena");
+        assertThat(database.queryForObject("SELECT name FROM medications WHERE id = ?", String.class, example)).isEqualTo("Medicamento A");
+        assertThat(database.queryForObject("SELECT instructions FROM medications WHERE id = ?", String.class, personal)).isEqualTo("Contenido registrado por el cuidador");
+        assertThat(database.queryForObject("SELECT display_name FROM accounts WHERE id = ?", String.class, OTHER_ADULT)).isEqualTo("Nombre personal");
+        assertThat(database.queryForObject("SELECT COUNT(*) FROM medications", Integer.class)).isEqualTo(2);
     }
 
     @Test
