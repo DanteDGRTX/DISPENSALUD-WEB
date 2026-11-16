@@ -6,6 +6,9 @@ los cambios pendientes sobre `bb4fd4a` (documentación/validación Firebase) y
 `443dab6` (diseño web anterior). Se conservaron los archivos modificados y nuevos.
 No se hizo push, merge ni despliegue.
 
+El ajuste posterior del dispensador en el acceso, las dos tarjetas de beneficios
+y los iconos está documentado en [AJUSTES_VISUALES_WEB.md](AJUSTES_VISUALES_WEB.md).
+
 ## Presentación recuperada
 
 - Portada con las mismas secciones y orden, paleta, tipografía, logotipo,

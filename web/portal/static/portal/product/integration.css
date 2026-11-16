@@ -4,3 +4,15 @@
 @media(min-width:1101px){.main-nav{display:block}.main-nav .nav-list{display:flex}.mobile-menu-toggle{display:none}}
 @media(max-width:460px){.brand-lockup img{width:145px}.navbar-container{gap:8px}.header-actions{gap:8px}.account-header{padding:9px 11px;font-size:.72rem}.mobile-menu-toggle{flex:0 0 38px;width:38px;height:38px}.hero-title{font-size:3.3rem}.hero-feature-list li{align-items:flex-start}.hero-feature-list strong{font-size:.76rem}.hero-feature-list small{font-size:.68rem}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* The two account roles share the existing blue profile illustrations. */
+.profile-illustration,.benefit-profile-icon{display:block;width:72px;height:auto;max-width:100%}
+.role-card{align-content:start}
+.role-card[aria-current="true"]{border-color:#35b9ff;background:#123853}
+#beneficios .benefit-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.benefit-profile-icon{margin-bottom:24px}
+@media(max-width:760px){
+  #beneficios .benefit-grid{grid-template-columns:minmax(0,1fr)}
+  #beneficios .benefit-grid article{grid-column:auto}
+  .benefit-profile-icon{margin-bottom:20px}
+}
