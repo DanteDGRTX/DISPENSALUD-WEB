@@ -4,6 +4,7 @@ from django.test import Client, TestCase, override_settings
 from .forms import RegistrationForm
 
 
+@override_settings(ROOT_URLCONF="config.legacy_urls")
 class ProductIntegrationTests(TestCase):
     def test_home_preserves_product_presentation_and_separate_account(self):
         response = self.client.get("/")

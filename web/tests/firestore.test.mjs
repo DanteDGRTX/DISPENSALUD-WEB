@@ -1,0 +1,48 @@
+import {before,after,test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {initializeTestEnvironment,assertFails} from '@firebase/rules-unit-testing';
+import {doc,getDoc,setDoc,deleteDoc,serverTimestamp,disableNetwork,enableNetwork} from 'firebase/firestore';
+import {initializeApp,deleteApp} from 'firebase/app';
+import {getAuth,connectAuthEmulator,createUserWithEmailAndPassword,sendEmailVerification,sendPasswordResetEmail,applyActionCode,reload,signInWithEmailAndPassword,signOut} from 'firebase/auth';
+import {AccountRepository} from '../frontend/repository.js';
+import {epochDay,limaDay,planChanges} from '../frontend/contract.js';
+let env;
+const projectId='demo-dispensalud-web';
+before(async()=>{env=await initializeTestEnvironment({projectId,firestore:{host:'127.0.0.1',port:8089,rules:await readFile(new URL('./android.firestore.rules',import.meta.url),'utf8')}});});
+after(async()=>{await env?.cleanup();});
+const patient=name=>({nombre:name,edad:60,foto:null,notas:'FICTICIO · EMULADOR',contactoEmergencia:'Contacto ficticio'});
+const treatment=pid=>({patientId:pid,medicamento:'FICTICIO',dosis:'Pauta ficticia',horarios:['08:00','12:00'],compartimento:1,fechaInicio:limaDay(Date.now()),fechaFin:null,activo:true,scheduleRevision:0});
+function repo(uid,verified=true){const db=env.authenticatedContext(uid,{email_verified:verified}).firestore();return new AccountRepository(db,uid);}
+async function fixture(){const uid='test-'+crypto.randomUUID(),r=repo(uid);await r.save('patients','patient-1',patient('FICTICIO'));await r.save('treatments','treatment-1',treatment('patient-1'));return r;}
+test('web Auth registers, verifies, resets and signs in shared Firebase account in emulator only',async()=>{
+ const a=initializeApp({projectId,apiKey:'demo-key'},'auth-'+crypto.randomUUID()),auth=getAuth(a);connectAuthEmulator(auth,'http://127.0.0.1:9098',{disableWarnings:true});
+ const email='ficticio-'+crypto.randomUUID()+'@example.test',password='Ficticio-emulator-2026';
+ try{const {user}=await createUserWithEmailAndPassword(auth,email,password);assert.equal(user.emailVerified,false);await sendEmailVerification(user);await sendPasswordResetEmail(auth,email);
+ const inbox=await (await fetch(`http://127.0.0.1:9098/emulator/v1/projects/${projectId}/oobCodes`)).json();const verification=inbox.oobCodes.find(x=>x.email===email&&x.requestType==='VERIFY_EMAIL');assert(verification);assert(inbox.oobCodes.some(x=>x.email===email&&x.requestType==='PASSWORD_RESET'));await applyActionCode(auth,verification.oobCode);await reload(user);assert.equal(user.emailVerified,true);await signOut(auth);await signInWithEmailAndPassword(auth,email,password);assert.equal(auth.currentUser.email,email);await signOut(auth);assert.equal(auth.currentUser,null);}finally{await deleteApp(a);}
+});
+test('same UID reads edits from a second independent client',async()=>{const a=await fixture(),b=repo(a.uid);const old=(await a.load()).patients[0];await b.save('patients',old.id,{...old.body,notas:'Cambio ficticio segundo cliente'},old);assert.equal((await a.load()).patients[0].body.notas,'Cambio ficticio segundo cliente');});
+test('different UID and unverified account cannot read or write another workspace',async()=>{const a=await fixture(),b=repo('other-'+crypto.randomUUID());assert.equal((await b.load()).patients.length,0);await assertFails(getDoc(doc(b.db,'users',a.uid,'patients','patient-1')));const unverified=repo(a.uid,false);await assertFails(unverified.load());await assertFails(unverified.save('patients','new-1',patient('FICTICIO')));});
+test('revisions reject stale concurrent edits and tombstones never resurrect',async()=>{const a=await fixture(),old=(await a.load()).patients[0];await a.save('patients',old.id,{...old.body,edad:61},old);await assert.rejects(()=>a.save('patients',old.id,{...old.body,edad:62},old),e=>e.code==='conflict');const current=(await a.load()).patients[0];const ref=a.ref('patients',current.id);await setDoc(ref,a.envelope('patients',current.id,current.body,current.revision+1,true));await assertFails(setDoc(ref,a.envelope('patients',current.id,current.body,current.revision+2,false)));await assertFails(deleteDoc(ref));});
+test('generation is idempotent across clients with Android-compatible identities',async()=>{const a=await fixture(),snap=await a.load(),t=snap.treatments[0],now=Date.now();const changes=await a.reconcile(t,snap.doseEvents,now);assert(changes>=13&&changes<=14);const second=repo(a.uid),fresh=await second.load();assert.equal(await second.reconcile(fresh.treatments[0],fresh.doseEvents,now),0);assert.equal(new Set(fresh.doseEvents.map(d=>d.id)).size,changes);await assert.rejects(()=>second.reconcile(t,[],now),e=>e.code==='conflict');});
+test('schedule edit and deactivate preserve unaffected identities and confirmed history',async()=>{const a=await fixture();let s=await a.load();await a.reconcile(s.treatments[0],s.doseEvents);s=await a.load();const oldIds=s.doseEvents.filter(d=>d.body.fechaHoraProgramada%86400000===17*3600000).map(d=>d.id);const t=s.treatments[0];await a.save('treatments',t.id,{...t.body,horarios:['12:00','18:00']},t);s=await a.load();assert.equal(s.treatments[0].body.scheduleRevision,1);await a.reconcile(s.treatments[0],s.doseEvents);s=await a.load();for(const id of oldIds)assert.equal(s.doseEvents.find(d=>d.id===id).deleted,false);const current=s.treatments[0];await a.save('treatments',current.id,{...current.body,activo:false},current);s=await a.load();await a.reconcile(s.treatments[0],s.doseEvents);s=await a.load();assert(s.doseEvents.every(d=>d.deleted));});
+test('manual record is confirmed once, provenance survives, no future or reversion',async()=>{const a=await fixture();let s=await a.load();const at=Date.now()-3600000;const body={patientId:'patient-1',treatmentId:'treatment-1',fechaHoraProgramada:at,fechaHoraReal:null,estado:'PENDING'};await a.save('doseEvents','legacy-1',body);s=await a.load();const d=s.doseEvents[0],t=s.treatments[0];await a.recordManual(d,t,s.doseEvents,at+1000,false,Date.now()-1000);s=await a.load();assert.equal(s.doseEvents[0].body.estado,'LATE');assert.equal(s.doseEvents[0].body.recordSource,'MANUAL');await assert.rejects(()=>a.recordManual(d,t,s.doseEvents,at+2000,false,Date.now()-1000));await assertFails(setDoc(a.ref('doseEvents',d.id),a.envelope('doseEvents',d.id,body,s.doseEvents[0].revision+1)));});
+test('rules reject foreign parents, bad schema, fake owner, schedule revision bypass and demo IDs',async()=>{const a=await fixture(),t=(await a.load()).treatments[0];await assertFails(setDoc(a.ref('treatments',t.id),a.envelope('treatments',t.id,{...t.body,horarios:['01:00']},t.revision+1)));const raw={ownerUid:'foreign',id:'x',schemaVersion:1,revision:1,mutationId:crypto.randomUUID(),deleted:false,updatedAt:serverTimestamp(),body:patient('FICTICIO')};await assertFails(setDoc(a.ref('patients','x'),raw));await assert.rejects(()=>a.save('treatments','bad-1',treatment('missing-parent')));await assertFails(setDoc(a.ref('treatments','bad-2'),a.envelope('treatments','bad-2',treatment('missing-parent'),1)));await assert.rejects(()=>a.save('patients','demo-fixture',patient('FICTICIO')));});
+test('alerts read state, presentation profile and session revocation',async()=>{const a=await fixture();await a.save('alerts','alert-1',{patientId:'patient-1',tipo:'DOSIS_OMITIDA',mensaje:'FICTICIO',fecha:Date.now(),leida:false});let s=await a.load(),alert=s.alerts[0];await a.save('alerts',alert.id,{...alert.body,leida:true},alert);await a.save('preferences','presentation',{profile:'Cuidador'});s=await a.load();assert.equal(s.alerts[0].body.leida,true);assert.equal(s.preferences[0].body.profile,'Cuidador');a.close();await assert.rejects(()=>a.load(),e=>e.code==='session-changed');});
+test('server listeners deliver updates and stop on closing the account',async()=>{const a=await fixture(),b=repo(a.uid);let calls=0;await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('Listener timeout')),10000);a.watch((kind,rows)=>{if(kind==='patients'&&rows.some(d=>d.body.notas==='FICTICIO LISTENER')){calls++;clearTimeout(timer);resolve();}},reject);b.load().then(s=>b.save('patients','patient-1',{...s.patients[0].body,notas:'FICTICIO LISTENER'},s.patients[0])).catch(reject);});a.close();const s=await b.load();await b.save('patients','patient-1',{...s.patients[0].body,notas:'FICTICIO AFTER CLOSE'},s.patients[0]);await new Promise(r=>setTimeout(r,100));assert.equal(calls,1);});
+
+test('server-only reads reject offline cache and recover after reconnect',async()=>{
+ const a=await fixture(),before=await a.load();await disableNetwork(a.db);
+ await assert.rejects(()=>a.load(),e=>e.code==='unavailable');
+ await enableNetwork(a.db);const after=await a.load();assert.equal(after.patients.length,before.patients.length);
+ assert(!after.patients.some(p=>p.id==='offline-1'));
+});
+
+test('in-flight account reads cannot publish after session revocation',async()=>{const a=await fixture();const pending=a.load();a.close();await assert.rejects(()=>pending,e=>e.code==='session-changed');});
+
+test('maximum 24 daily slots generate 168 compatible documents in one transaction',async()=>{
+ const a=await fixture();let s=await a.load();const t=s.treatments[0];
+ await a.save('treatments',t.id,{...t.body,horarios:Array.from({length:24},(_,i)=>String(i).padStart(2,'0')+':00')},t);
+ s=await a.load();const now=Date.now();assert.equal(await a.reconcile(s.treatments[0],s.doseEvents,now),168);
+ s=await a.load();assert.equal(s.doseEvents.length,168);assert.equal(await a.reconcile(s.treatments[0],s.doseEvents,now),0);
+});

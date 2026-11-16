@@ -6,6 +6,7 @@ from django.test import Client, TestCase, override_settings
 from .forms import ScheduleForm
 
 
+@override_settings(ROOT_URLCONF="config.legacy_urls")
 class PortalAccessTests(TestCase):
     def setUp(self):
         self.client = Client()

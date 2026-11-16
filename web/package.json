@@ -1,0 +1,17 @@
+{
+  "name": "dispensalud-firebase-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test tests/contract.test.mjs",
+    "test:emulator": "firebase emulators:exec --config firebase.test.json --project demo-dispensalud-web --only auth,firestore \"node --test tests/firestore.test.mjs\""
+  },
+  "dependencies": { "firebase": "13.3.0" },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "6.0.0",
+    "esbuild": "0.28.2",
+    "firebase-tools": "15.36.0"
+  },
+  "engines": { "node": ">=22" }
+}

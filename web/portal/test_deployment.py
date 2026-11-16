@@ -8,6 +8,7 @@ from config.deployment import postgres_database
 from .api import ApiError
 
 
+@override_settings(ROOT_URLCONF="config.legacy_urls")
 class DatabaseConfigurationTests(SimpleTestCase):
     def test_cloud_configuration_requires_credentials_and_verified_tls(self):
         with self.assertRaises(ImproperlyConfigured):
@@ -22,6 +23,7 @@ class DatabaseConfigurationTests(SimpleTestCase):
 
 
 @override_settings(HOSTED_DEMO=True, REGISTRATION_ENABLED=False)
+@override_settings(ROOT_URLCONF="config.legacy_urls")
 class HostedAccessTests(TestCase):
     def test_public_home_and_login_do_not_request_browser_credentials(self):
         for path in ("/", "/ingresar/"):

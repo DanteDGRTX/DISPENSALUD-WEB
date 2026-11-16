@@ -1,19 +1,21 @@
 from django.urls import path
 
-from portal import views
+from portal import views, firebase_views as firebase
 
 
 urlpatterns = [
-    path("salud/", views.health, name="health"),
+    path("salud/", firebase.health, name="health"),
     path("", views.home, name="home"),
-    path("panel/", views.dashboard, name="dashboard"),
-    path("cuenta/crear/", views.register_view, name="register"),
-    path("ingresar/", views.login_view, name="login"),
-    path("salir/", views.logout_view, name="logout"),
-    path("medicamentos/crear/", views.create_medication, name="create_medication"),
-    path("horarios/crear/", views.create_schedule, name="create_schedule"),
-    path("medicamentos/<uuid:medication_id>/editar/", views.update_medication, name="update_medication"),
-    path("horarios/estado/", views.toggle_schedule, name="toggle_schedule"),
-    path("ayuda/solicitar/", views.request_help, name="request_help"),
-    path("ayuda/<uuid:request_id>/atender/", views.resolve_help, name="resolve_help"),
+    path("panel/", firebase.shell, name="dashboard"),
+    path("cuenta/crear/", firebase.shell, {"page":"register"}, name="register"),
+    path("ingresar/", firebase.shell, {"page":"login"}, name="login"),
+    path("cuenta/recuperar/", firebase.shell, {"page":"reset"}, name="reset"),
+    path("cuenta/verificar/", firebase.shell, {"page":"verify"}, name="verify"),
+    path("salir/", firebase.shell, {"page":"logout"}, name="logout"),
+    path("pacientes/", firebase.shell, {"page":"patients"}, name="patients"),
+    path("tratamientos/", firebase.shell, {"page":"treatments"}, name="treatments"),
+    path("historial/", firebase.shell, {"page":"history"}, name="history"),
+    path("alertas/", firebase.shell, {"page":"alerts"}, name="alerts"),
+    path("equipo/", firebase.shell, {"page":"device"}, name="device"),
+    path("perfil/", firebase.shell, {"page":"profile"}, name="profile"),
 ]

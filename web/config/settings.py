@@ -9,11 +9,12 @@ from .deployment import postgres_database, required
 BASE_DIR = Path(__file__).resolve().parent.parent
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
 HOSTED_DEMO = os.environ.get("DISPENSALUD_HOSTED_DEMO", "0") == "1"
+FIREBASE_EMULATORS = DEBUG and os.environ.get("DISPENSALUD_FIREBASE_EMULATORS", "0") == "1"
 REGISTRATION_ENABLED = os.environ.get("DISPENSALUD_REGISTRATION_ENABLED", "1" if DEBUG and not HOSTED_DEMO else "0") == "1"
 if HOSTED_DEMO and DEBUG:
     raise ImproperlyConfigured("La demo alojada no admite DJANGO_DEBUG=1.")
-DATA_DIR = BASE_DIR / "data"
-DATA_DIR.mkdir(exist_ok=True)
+DATA_DIR = Path(os.environ.get("DJANGO_DATA_DIR", str(BASE_DIR / "data")))
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "")
 if not SECRET_KEY:
     if not DEBUG:
@@ -27,6 +28,9 @@ if not SECRET_KEY:
     SECRET_KEY = key_path.read_text(encoding="utf-8")
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost,testserver").split(",")
+CSRF_TRUSTED_ORIGINS = [v for v in os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if v]
+if os.environ.get("DJANGO_BEHIND_PROXY", "0") == "1":
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 if HOSTED_DEMO:
     hostname = required(os.environ, "RENDER_EXTERNAL_HOSTNAME")
     ALLOWED_HOSTS = [hostname]
@@ -64,6 +68,7 @@ USE_I18N = True
 USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STORAGES = {"staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"}}
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"

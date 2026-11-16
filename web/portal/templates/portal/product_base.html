@@ -6,18 +6,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="DispenSalud: tecnología y acompañamiento para organizar los horarios de medicación. Proyecto de innovación tecnológica TECSUP.">
   <title>{% block title %}DispenSalud · Tecnología y cuidado{% endblock %}</title>
+  <link rel="icon" type="image/webp" href="{% static 'portal/firebase/assets/brand_dispensalud.webp' %}">
   <link rel="stylesheet" href="{% static 'portal/product/reference.css' %}">
   <link rel="stylesheet" href="{% static 'portal/product/integration.css' %}">
+  <link rel="stylesheet" href="{% static 'portal/firebase/landing.css' %}">
   <script src="{% static 'portal/product/site.js' %}" defer></script>
 </head>
 <body class="site-body">
 <a class="skip-link" href="#main-content">Saltar al contenido</a>
 <header class="site-header" id="site-header">
-  <div class="header-top-strip"><div class="container header-strip-inner"><div class="tecsup-identity"><span class="tecsup-badge">TECSUP</span><span class="tecsup-project-label">Proyecto de innovación tecnológica</span></div><span class="prototype-status-pill"><span class="status-dot" aria-hidden="true"></span>Tecnología para acompañar</span></div></div>
+  <div class="header-top-strip"><div class="container header-strip-inner"><div class="tecsup-identity"><img class="tecsup-logo" src="{% static 'portal/firebase/assets/brand_tecsup.webp' %}" alt="TECSUP" width="100" height="30"><span class="tecsup-project-label">Proyecto de innovación tecnológica</span></div><span class="prototype-status-pill"><span class="status-dot" aria-hidden="true"></span>Tecnología para acompañar</span></div></div>
   <div class="container navbar-container">
-    <a href="{% url 'home' %}" class="brand-logo brand-lockup" aria-label="DispenSalud, volver al inicio"><img src="{% static 'portal/product/images/brand-lockup.png' %}" alt="DispenSalud y TECSUP" width="387" height="64"></a>
+    <a href="{% url 'home' %}" class="brand-logo brand-lockup" aria-label="DispenSalud, volver al inicio"><img src="{% static 'portal/firebase/assets/brand_dispensalud.webp' %}" alt="" width="44" height="44"><span>Dispensa<span class="blue">lud</span></span></a>
     <nav class="main-nav" aria-label="Principal"><ul class="nav-list"><li><a class="nav-link" href="{% url 'home' %}#inicio">Inicio</a></li><li><a class="nav-link" href="{% url 'home' %}#producto">Producto</a></li><li><a class="nav-link" href="{% url 'home' %}#beneficios">Beneficios</a></li><li><a class="nav-link" href="{% url 'home' %}#funcionamiento">Cómo funciona</a></li><li><a class="nav-link" href="{% url 'home' %}#galeria">Galería</a></li></ul></nav>
-    <div class="header-actions"><a class="btn btn-primary account-header" href="{% if request.session.api_token %}{% url 'dashboard' %}{% else %}{% url 'login' %}{% endif %}">{% if request.session.api_token %}Mi panel{% else %}Mi cuenta{% endif %}<span aria-hidden="true">↗</span></a><button type="button" class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-drawer"><span class="hamburger-bar"></span><span class="hamburger-bar"></span><span class="hamburger-bar"></span></button></div>
+    <div class="header-actions"><a class="btn btn-primary account-header" href="{% url 'login' %}">Mi cuenta<span aria-hidden="true">↗</span></a><button type="button" class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-drawer"><span class="hamburger-bar"></span><span class="hamburger-bar"></span><span class="hamburger-bar"></span></button></div>
   </div>
   <div class="mobile-drawer" id="mobile-drawer" hidden><nav class="container mobile-drawer-inner" aria-label="Menú móvil"><a href="{% url 'home' %}#producto">Producto</a><a href="{% url 'home' %}#beneficios">Beneficios</a><a href="{% url 'home' %}#funcionamiento">Cómo funciona</a><a href="{% url 'home' %}#galeria">Galería</a><a href="{% url 'login' %}">Ingresar a mi cuenta</a><a href="{% url 'register' %}">Crear una cuenta</a></nav></div>
 </header>

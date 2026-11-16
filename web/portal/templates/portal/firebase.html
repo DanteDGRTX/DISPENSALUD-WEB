@@ -1,0 +1,16 @@
+{% load static %}
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Tu cuenta Dispensalud, pacientes, tratamientos e historial compartidos con Android.">
+<title>Mi cuenta · Dispensalud</title>
+<link rel="icon" type="image/webp" href="{% static 'portal/firebase/assets/brand_dispensalud.webp' %}">
+<link rel="preload" href="{% static 'portal/firebase/assets/InterVariable.woff2' %}" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{% static 'portal/firebase/app.css' %}">
+<script type="module" src="{% static 'portal/firebase/app.js' %}"></script></head>
+<body data-page="{{ page }}"><a class="skip" href="#main-content">Saltar al contenido</a>
+{{ runtime|json_script:"firebase-runtime" }}
+<div id="app"><main id="main-content" class="loading" tabindex="-1"><span class="spinner" aria-hidden="true"></span><h1>Preparando tu espacio…</h1><p role="status">Restaurando la sesión de forma segura.</p></main></div>
+<noscript><p>Activa JavaScript para iniciar sesión con Firebase y consultar tus datos.</p></noscript>
+<div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
+<dialog id="editor" aria-labelledby="editor-title"></dialog>
+</body></html>
