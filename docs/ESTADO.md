@@ -1,5 +1,28 @@
 # Estado real del primer incremento
 
+## Estado vigente de `feature/firebase-web` · 16 noviembre 2026
+
+La rama local usa Django + Firebase Authentication/Firestore y recupera el diseño
+web original. Se conservan las cuentas y el contrato Android, el aislamiento por
+UID/correo verificado, pacientes, tratamientos, planificación, historial manual,
+alertas y perfil. Spring Boot/Supabase pertenecen a la implementación histórica.
+Usuario y Cuidador son preferencias de presentación, sin colaboración entre UIDs.
+
+Cabecera/pie compartidos, estilos del panel limitados a `.web-workspace` y
+eliminación intencional de `landing.css`, sin referencias activas. Se conserva el
+dispensador original y los iconos necesarios. Guía y validación actual en
+[RECUPERACION_DISENO_WEB.md](RECUPERACION_DISENO_WEB.md).
+
+Revisión local en http://localhost:8000/. No se hizo push, merge ni despliegue.
+Pendientes: prueba real de cuenta Android e intercambio web↔Android, revisión de
+reglas/dominios Firebase publicados, colaboración entre cuentas e integración
+ESP32. Las pruebas usan emuladores y datos ficticios, sin acreditar ingestión.
+
+## Historial del primer incremento
+
+Las cifras, servicios y pendientes siguientes son históricos; no reemplazan el
+estado ni la validación actual de la rama Firebase.
+
 ## Actualización de noviembre de 2026
 
 El despliegue anterior se verificó en octubre y el usuario confirmó su funcionamiento. Los apuntes que indican nube sin conectar corresponden a etapas anteriores. La nueva portada, Mi cuenta y registro de desarrollo se describen en `INTEGRACION_INTERFAZ.md`: implementados y probados localmente, todavía sin nuevo despliegue. Total actual: 56 pruebas automatizadas aprobadas. Registro público completo, correo, recuperación, vínculos por invitación y hardware siguen pendientes. Ver el informe PDF del respaldo para el estado consolidado.

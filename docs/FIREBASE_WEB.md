@@ -45,8 +45,10 @@ Referencias: [SDK modular](https://firebase.google.com/docs/web/setup),
 - Perfil, cierre y equipo con “Sin dispositivo vinculado”.
 - Estados de carga, vacío, error, reintento, escritura pendiente y acuse servidor.
   Los permisos rechazados no se convierten en listas vacías.
-- Tema oscuro/azul, recursos transparentes Android, iconos fieles a sus vectores,
-  fuente Inter local con licencia, tamaños adaptables y formularios etiquetados.
+- Presentación web original oscura/azul, tipografía y logotipo originales,
+  dispensador e iconos de perfil/navegación, tamaños adaptables y formularios
+  etiquetados. La fuente Inter y otros recursos copiados se conservan disponibles;
+  no sustituyen la tipografía global. Ver [recuperación del diseño](RECUPERACION_DISENO_WEB.md).
 
 ## Contrato exacto y concurrencia
 

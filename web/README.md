@@ -22,6 +22,7 @@ cd web
 npm test
 npm run test:emulator
 npm run build
+npm run test:browser
 ```
 
 La suite de emulador requiere Java 21+ y puertos 8089/9098 libres. Usa únicamente
@@ -29,8 +30,28 @@ el proyecto local `demo-dispensalud-web`. No crea cuentas ni envía correos real
 Las reglas copiadas en `tests` son una referencia local, no una configuración de
 publicación. No ejecutar `firebase deploy` para esta entrega.
 
+El diseño recuperado utiliza las plantillas originales con cabecera/pie compartidos.
+`frontend/presentation.js` contiene la presentación; `main.js` conserva Firebase y
+los eventos de los controles. El build genera `app.js` y `panel-web.css`: esta
+última limita Bootstrap y los estilos originales del panel a `.web-workspace`,
+sin alterar la portada ni el formulario de acceso. `app.css` adapta los controles
+Firebase. La eliminación de `landing.css` es intencional; no debe volver a enlazarse.
+
+Las pruebas de navegador usan Brave en Windows por defecto; para otro ejecutable
+Chromium, configura `$env:DISPENSALUD_BROWSER = 'C:\ruta\chrome.exe'`.
+`npm run test:browser` inicia/cierra su Django temporal en 8002 y los emuladores;
+no modifica el servidor 8000 ni necesita cuentas reales. Requiere el entorno
+`.venv` preparado y esos puertos libres.
+
+Comparación opcional: `npm run test:visual`, con la web actual en 8000 y la
+referencia ya servida en 8001. `DISPENSALUD_ORIGINAL` permite indicar la carpeta
+de referencia; solo se leen sus plantillas. No arrancar servicios ni instalar
+dependencias dentro de esa carpeta. Las capturas/informes van a
+`previews/design-correction/` y `web/build/`, excluidos de Git.
+
 [Contrato, funciones y límites](../docs/FIREBASE_WEB.md) ·
 [Resultados de pruebas](../docs/PRUEBAS_FIREBASE_WEB.md) ·
+[Recuperación del diseño](../docs/RECUPERACION_DISENO_WEB.md) ·
 [Preparar AWS sin desplegar](../docs/DESPLEGAR_AWS_FIREBASE.md).
 
 El código de la demo antigua permanece para consulta y pruebas bajo un URLconf

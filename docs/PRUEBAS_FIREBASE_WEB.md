@@ -1,5 +1,11 @@
 # Validación ejecutada · 16 noviembre 2026
 
+La validación posterior de la recuperación del diseño está en
+[RECUPERACION_DISENO_WEB.md](RECUPERACION_DISENO_WEB.md), incluyendo los resultados
+actuales de Django, contrato, reglas Firebase y navegador. Las capturas y la barra
+inferior descritas abajo corresponden a la primera presentación Firebase y quedan
+como historial; la versión actual usa el diseño original y menú móvil desplegable.
+
 Solo local. El propietario eligió **dejar la prueba real pendiente**. No se usaron
 credenciales reales, pacientes reales, correos reales ni escrituras de producción.
 

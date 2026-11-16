@@ -1,5 +1,34 @@
 # Dispensalud proyect — punto para retomar
 
+## Estado vigente · 16 de noviembre de 2026
+
+Trabajar en `D:\dispensalud-web`, rama `feature/firebase-web`. La web activa usa
+Django para páginas/estáticos y Firebase Authentication/Firestore para cuentas y
+datos compatibles con Android. No requiere Spring Boot ni Supabase. Los perfiles
+Usuario/Cuidador no dan acceso a otras cuentas.
+
+Se recuperó la presentación web original: portada, logotipo, cabecera, pie,
+tipografía, tarjetas y distribución. Se conservan los flujos Firebase; se añaden
+el dispensador y los iconos de perfil/navegación. `landing.css` se elimina
+intencionalmente porque sobrescribía el diseño global; no quedan enlaces a ella.
+
+Leer [recuperación del diseño](docs/RECUPERACION_DISENO_WEB.md),
+[web/README.md](web/README.md) y [contrato Firebase](docs/FIREBASE_WEB.md).
+Iniciar con `.\scripts\Start-Web.ps1`; revisar http://localhost:8000/ y
+http://localhost:8000/ingresar/. Validación actual y comandos en la guía de
+recuperación. Las pruebas reales web↔Android y el hardware siguen pendientes.
+
+Al retomar, conservar los archivos modificados/nuevos y consultar `git status`.
+`D:\dispensalud-web-original` es una referencia de solo lectura. Esta entrega es
+local: sin push, merge ni despliegue. Capturas e informes temporales se conservan
+localmente, excluidos del commit; no guardar secretos ni datos de usuarios en Git.
+
+## Historial anterior · arquitectura Spring Boot
+
+Los apartados siguientes documentan etapas previas, no el acceso ni los pendientes
+de la rama Firebase actual. Sus autorizaciones de publicación no se aplican a esta
+entrega local.
+
 Actualización de acceso del 3 de noviembre: se retiró la ventana del navegador `revision` por solicitud de Gustavo. La portada es pública y los paneles conservan el inicio de sesión personal y sus permisos. Se cambiaron las contraseñas de las dos cuentas demo alojadas; no escribirlas en Git ni suponer que coinciden con la variable de creación inicial de cuentas. El registro público permanece cerrado. Ver `docs/ACCESO_PERSONAL.md`.
 
 ## Último incremento: interfaz del equipo, noviembre de 2026

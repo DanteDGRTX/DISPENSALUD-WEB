@@ -37,6 +37,14 @@ class FirebaseShellTests(SimpleTestCase):
 
     def test_landing_uses_copied_assets_and_current_scope(self):
         response=self.client.get('/')
-        self.assertContains(response, 'firebase/assets/pillbox_pro.webp')
+        self.assertContains(response, 'product/images/pillbox-transparent.png')
         self.assertContains(response, 'Firebase')
         self.assertNotContains(response, 'se ejecuta en Render')
+
+    def test_account_shell_preserves_original_site_navigation_and_footer(self):
+        response = self.client.get('/ingresar/')
+        for anchor in ('inicio', 'producto', 'beneficios', 'funcionamiento', 'galeria'):
+            self.assertContains(response, f'href="/#{anchor}"')
+        self.assertContains(response, 'class="integration-footer"')
+        self.assertContains(response, 'product/images/brand-lockup.png')
+        self.assertNotContains(response, 'firebase/landing.css')

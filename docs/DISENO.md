@@ -1,5 +1,11 @@
 # Iteración visual y funcional con referencia de Figma
 
+**Estado vigente (16 noviembre 2026, `feature/firebase-web`):** se recuperó el
+diseño web original oscuro/azul, con cabecera/pie compartidos, navegación lateral
+en escritorio y menú de secciones desplegable en móvil. Firebase conserva cuentas
+y datos. Ver [RECUPERACION_DISENO_WEB.md](RECUPERACION_DISENO_WEB.md).
+El resto de este documento describe la iteración histórica clara/verde.
+
 Referencia revisada: https://www.figma.com/design/jVpjNHzLSR7VczygZo8i4R/Sin-t%C3%ADtulo?node-id=0-1
 
 El archivo visible contiene plantillas móviles generales: dashboard, actividad, entrada y otras pantallas. Se revisó visualmente mediante acceso de invitado; no se modificó el Figma. No es una plantilla específica de medicación. Se adoptaron su organización por tarjetas, jerarquía tipográfica y navegación inferior para móviles, adaptadas a DispenSalud.

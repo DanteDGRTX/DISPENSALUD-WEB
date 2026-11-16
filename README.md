@@ -13,6 +13,10 @@ Lee [web/README.md](web/README.md), [entrega y pruebas](docs/FIREBASE_WEB.md) y
 [guía AWS sin desplegar](docs/DESPLEGAR_AWS_FIREBASE.md).
 Rama: `feature/firebase-web`. No se hizo push, merge ni despliegue.
 
+Diseño web original recuperado conservando Firebase, con cabecera/pie compartidos,
+dispensador e iconos necesarios. Guía de cambios, reproducción y comprobaciones en
+[RECUPERACION_DISENO_WEB.md](docs/RECUPERACION_DISENO_WEB.md).
+
 Los apartados siguientes conservan la historia de la versión Spring Boot.
 Sus cuentas, vínculos y preparación Supabase/Render **no describen el acceso actual**.
 
