@@ -1,7 +1,37 @@
-# Portal Django con Bootstrap
+# Portal Dispensalud con Firebase
 
-El cuidador puede consultar a sus personas vinculadas, registrar medicamentos y crear horarios diarios. La persona mayor recibe una vista legible y sencilla de su programación. Ambas vistas son adaptables a móviles.
+Django sirve la portada, las pantallas y los estáticos. El SDK modular Firebase
+comparte Authentication y Firestore con Android. Los datos privados se autorizan
+por UID y correo verificado; no existe una sesión de negocio Django ni endpoints
+privilegiados. Spring Boot y Supabase no son necesarios para estas pantallas.
 
-Django renderiza el portal, valida formularios y protege los POST con CSRF. Consulta la API desde el servidor y guarda el token en una sesión del servidor. Los datos de negocio pertenecen a Spring Boot; Django no modifica sus tablas directamente.
+Desde la raíz en PowerShell:
 
-Usa `scripts/Start-Web.ps1` desde la raíz para preparar el entorno y arrancar Django. `DISPENSALUD_API_URL` define el servidor de API; por defecto es `http://127.0.0.1:8080/api/v1`. En desarrollo se crea una clave aleatoria local en `data/`, ignorada por Git. Con `DJANGO_DEBUG=0` se exige `DJANGO_SECRET_KEY`; el despliegue público también requiere configurar TLS y el almacenamiento apropiado de sesiones.
+```powershell
+.\scripts\Start-Web.ps1
+```
+
+Abre http://localhost:8000/ingresar/. Requiere Python 3.13 y Node 22+.
+El script prepara el entorno, instala dependencias y compila el cliente.
+Después de cambiar dependencias, ejecuta `npm ci` dentro de `web`.
+Para cambios JS usa `npm run build` y recarga. Reinicia Django tras cambios Python.
+
+```powershell
+cd web
+.\.venv\Scripts\python.exe manage.py test portal
+npm test
+npm run test:emulator
+npm run build
+```
+
+La suite de emulador requiere Java 21+ y puertos 8089/9098 libres. Usa únicamente
+el proyecto local `demo-dispensalud-web`. No crea cuentas ni envía correos reales.
+Las reglas copiadas en `tests` son una referencia local, no una configuración de
+publicación. No ejecutar `firebase deploy` para esta entrega.
+
+[Contrato, funciones y límites](../docs/FIREBASE_WEB.md) ·
+[Resultados de pruebas](../docs/PRUEBAS_FIREBASE_WEB.md) ·
+[Preparar AWS sin desplegar](../docs/DESPLEGAR_AWS_FIREBASE.md).
+
+El código de la demo antigua permanece para consulta y pruebas bajo un URLconf
+histórico, fuera de las rutas activas. No se importan sus cuentas ni registros.

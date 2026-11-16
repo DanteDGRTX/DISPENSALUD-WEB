@@ -1,0 +1,21 @@
+[Unit]
+Description=Dispensalud Django Firebase web
+After=network.target
+
+[Service]
+User=dispensalud
+Group=dispensalud
+WorkingDirectory=/srv/dispensalud/current/web
+EnvironmentFile=/etc/dispensalud/web.env
+ExecStart=/srv/dispensalud/current/web/.venv/bin/gunicorn config.wsgi:application --bind 127.0.0.1:8000 --workers 2 --timeout 60 --access-logfile - --error-logfile -
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/dispensalud/shared
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

@@ -1,5 +1,21 @@
 # DispenSalud
 
+## Web Firebase local · 16 noviembre 2026
+
+La versión actual usa **Django + Firebase Authentication/Firestore**, con las mismas
+cuentas y el contrato Android de `D:\dispensalud-codex`. No necesita iniciar Spring
+Boot ni Supabase. No importa cuentas ni registros de la demo anterior.
+
+Desde PowerShell: `.\scripts\Start-Web.ps1`. Abre http://localhost:8000.
+Requiere Python 3.13 y Node.js 22 o superior. Las dependencias están fijadas.
+
+Lee [web/README.md](web/README.md), [entrega y pruebas](docs/FIREBASE_WEB.md) y
+[guía AWS sin desplegar](docs/DESPLEGAR_AWS_FIREBASE.md).
+Rama: `feature/firebase-web`. No se hizo push, merge ni despliegue.
+
+Los apartados siguientes conservan la historia de la versión Spring Boot.
+Sus cuentas, vínculos y preparación Supabase/Render **no describen el acceso actual**.
+
 Repositorio privado: https://github.com/luisgustavosalcedo53-sys/dispensalud-proyect · Rama principal: `main`.
 
 Primer incremento ejecutable local: API Spring Boot y portal Django con Bootstrap. Incluye cuentas distintas para cuidador y adulto mayor, permisos por persona, medicamentos y horarios diarios con datos ficticios.
