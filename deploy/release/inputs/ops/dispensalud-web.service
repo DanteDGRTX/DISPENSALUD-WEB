@@ -1,0 +1,45 @@
+[Unit]
+Description=DispenSalud web - Django and Firebase
+After=network.target
+StartLimitIntervalSec=300
+StartLimitBurst=3
+
+[Service]
+Type=simple
+User=dispensalud-web
+Group=dispensalud-web
+WorkingDirectory=/srv/dispensalud-web/current/web
+EnvironmentFile=/etc/dispensalud-web/web.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=PYTHONUNBUFFERED=1
+Environment=MALLOC_ARENA_MAX=2
+Environment=PYTHONNOUSERSITE=1
+ExecStartPre=/srv/dispensalud-web/current/.venv/bin/python /srv/dispensalud-web/current/ops/verify_environment.py
+ExecStart=/srv/dispensalud-web/current/.venv/bin/gunicorn --config /srv/dispensalud-web/current/ops/gunicorn.conf.py config.wsgi:application
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=25
+KillSignal=SIGTERM
+RuntimeDirectory=dispensalud-web
+RuntimeDirectoryMode=0700
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/dispensalud-web/shared /run/dispensalud-web
+UMask=0077
+MemoryAccounting=true
+MemoryHigh=128M
+MemoryMax=192M
+MemorySwapMax=0
+TasksMax=32
+CPUWeight=20
+IOWeight=20
+Nice=5
+OOMScoreAdjust=200
+OOMPolicy=stop
+LogRateLimitIntervalSec=30s
+LogRateLimitBurst=20
+
+[Install]
+WantedBy=multi-user.target

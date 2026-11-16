@@ -1,0 +1,8 @@
+/var/log/nginx/dispensalud-web-error.log {
+    size 1M
+    rotate 3
+    compress
+    missingok
+    notifempty
+    copytruncate
+}

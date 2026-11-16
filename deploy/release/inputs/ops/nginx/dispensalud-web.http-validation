@@ -1,0 +1,13 @@
+# Initial HTTP-only ACME site. NEW file only; app host only. No default_server.
+server {
+    listen 80;
+    server_name app.dispensalud.site;
+    access_log off;
+    error_log /var/log/nginx/dispensalud-web-error.log warn;
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/dispensalud-web-acme;
+        default_type text/plain;
+        try_files $uri =404;
+    }
+    location / { return 503; }
+}

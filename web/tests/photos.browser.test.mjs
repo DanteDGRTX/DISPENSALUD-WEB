@@ -1,0 +1,55 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {spawn} from 'node:child_process';
+import {mkdir,readFile} from 'node:fs/promises';
+import {resolve} from 'node:path';
+import {chromium,expect} from '@playwright/test';
+import {initializeApp,deleteApp} from 'firebase/app';
+import {getAuth,connectAuthEmulator,createUserWithEmailAndPassword,sendEmailVerification,applyActionCode,reload} from 'firebase/auth';
+import {getFirestore,connectFirestoreEmulator} from 'firebase/firestore';
+import {AccountRepository} from '../frontend/repository.js';
+
+test('private photos across browser and independent authenticated client; restart and isolation',{timeout:120000},async()=>{
+  assert(process.env.FIRESTORE_EMULATOR_HOST,'Emulators required');
+  const base='http://localhost:8003',project='demo-dispensalud-web';
+  const app=initializeApp({projectId:project,apiKey:'demo-key'},'photos-'+crypto.randomUUID());
+  const auth=getAuth(app);connectAuthEmulator(auth,'http://127.0.0.1:9098',{disableWarnings:true});
+  const db=getFirestore(app);connectFirestoreEmulator(db,'127.0.0.1',8089);
+  const email='photos-'+crypto.randomUUID()+'@example.test',password='Photos-fiction-2026';
+  let server,browser;
+  const start=async()=>{server=spawn(resolve('.venv/Scripts/python.exe'),['manage.py','runserver','127.0.0.1:8003','--noreload'],{windowsHide:true,stdio:'ignore',env:{...process.env,DJANGO_DEBUG:'1',DISPENSALUD_FIREBASE_EMULATORS:'1',DJANGO_DATA_DIR:resolve('build/photos-browser-state')}});for(let i=0;i<100;i++){try{if((await fetch(base+'/salud/')).ok)return;}catch{}await new Promise(r=>setTimeout(r,100));}throw Error('Django did not start');};
+  const stop=async()=>{if(server?.pid)await new Promise(r=>spawn('taskkill.exe',['/PID',String(server.pid),'/T','/F'],{windowsHide:true,stdio:'ignore'}).on('exit',r));server=null;};
+  const verified=async mail=>{const {user}=await createUserWithEmailAndPassword(auth,mail,password);await sendEmailVerification(user);const inbox=await(await fetch(`http://127.0.0.1:9098/emulator/v1/projects/${project}/oobCodes`)).json();await applyActionCode(auth,inbox.oobCodes.find(code=>code.email===mail).oobCode);await reload(user);return user;};
+  try{
+    await mkdir('build',{recursive:true});
+    const generated=spawn(resolve('.venv/Scripts/python.exe'),['-c',"from PIL import Image; Image.new('RGB',(120,90),(25,100,180)).save('build/photo-fiction.png')"],{windowsHide:true});await new Promise(r=>generated.on('exit',r));
+    const bytes=await readFile('build/photo-fiction.png');
+    const user=await verified(email),token=await user.getIdToken(true);
+    const repo=new AccountRepository(db,user.uid),patientId=crypto.randomUUID();
+    await repo.save('patients',patientId,{nombre:'FICTICIO · Fotos',edad:60,foto:null,notas:'',contactoEmergencia:'Contacto ficticio'});
+    await start();
+    const remote=async(path,method='GET',body=null,etag='none',bearer=token)=>fetch(base+'/api/photos/v1/'+path,{method,headers:{Authorization:'Bearer '+bearer,...(body?{'Content-Type':'image/png','Idempotency-Key':crypto.randomUUID()}:{}),...(method!=='GET'?{'If-Match':etag}:{})},...(body?{body}:{})});
+    const uploaded=await remote('patients/'+patientId+'/','PUT',bytes);assert.equal(uploaded.status,200);const first=await uploaded.json();
+    browser=await chromium.launch({headless:true,executablePath:process.env.DISPENSALUD_BROWSER??'C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe'});
+    const context=await browser.newContext();const page=await context.newPage();await page.goto(base+'/ingresar/');
+    await page.getByLabel('Correo electrónico',{exact:true}).fill(email);await page.getByLabel('Contraseña',{exact:true}).fill(password);await page.getByRole('button',{name:'Entrar a mi espacio →',exact:true}).click();
+    await expect(page.locator('.page-heading h1')).toHaveText('Cuidar empieza aquí.');
+    await page.goto(base+'/pacientes/');
+    await expect(page.locator(`[data-photo-subject="patient:${patientId}"] img`)).toBeVisible();
+    assert(await page.locator(`[data-photo-subject="patient:${patientId}"] img`).evaluate(image=>image.naturalWidth>0));
+    await page.getByRole('button',{name:'Foto',exact:true}).click();await page.locator('.private-photo-editor input').setInputFiles('build/photo-fiction.png');
+    await page.getByRole('button',{name:'Subir foto',exact:true}).click();await expect(page.locator('.photo-status')).toHaveText('Foto subida y confirmada.');
+    const second=await(await remote('patients/'+patientId+'/')).json();assert.notEqual(first.photoId,second.photoId);
+    assert.equal((await remote('files/'+second.photoId+'/')).status,200);assert.equal((await remote('files/'+first.photoId+'/')).status,404);
+    await stop();await start();assert.equal((await(await remote('patients/'+patientId+'/')).json()).photoId,second.photoId);
+    await page.locator('.private-photo-editor input').setInputFiles('build/photo-fiction.png');await context.setOffline(true);await page.getByRole('button',{name:'Subir foto',exact:true}).click();
+    await expect(page.locator('.photo-status')).toContainText('No se pudo conectar');await context.setOffline(false);await page.getByRole('button',{name:'Reintentar subida',exact:true}).click();await expect(page.locator('.photo-status')).toHaveText('Foto subida y confirmada.');
+    await page.getByRole('button',{name:'Eliminar foto compartida',exact:true}).click();await expect(page.locator('.photo-status')).toContainText('eliminada');
+    assert.equal((await(await remote('patients/'+patientId+'/')).json()).state,'deleted');
+    const profile=await(await remote('profile/','PUT',bytes)).json();
+    assert.equal((await repo.load()).patients[0].body.foto,null);
+    const other=await verified('photos-b-'+crypto.randomUUID()+'@example.test'),otherToken=await other.getIdToken(true);
+    assert.equal((await remote('files/'+profile.photoId+'/','GET',null,'none',otherToken)).status,404);
+    assert.equal((await remote('patients/'+patientId+'/','PUT',bytes,'none',otherToken)).status,404);
+  }finally{await browser?.close();await stop();await deleteApp(app);}
+});

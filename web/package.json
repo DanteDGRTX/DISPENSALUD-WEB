@@ -8,7 +8,8 @@
     "test:emulator": "firebase emulators:exec --config firebase.test.json --project demo-dispensalud-web --only auth,firestore \"node --test tests/firestore.test.mjs\"",
     "test:browser": "firebase emulators:exec --config firebase.test.json --project demo-dispensalud-web --only auth,firestore \"node --test tests/design.browser.test.mjs\"",
     "test:visual": "node tests/design.capture.mjs",
-    "test:visual:final": "node tests/visual-adjustments.capture.mjs"
+    "test:visual:final": "node tests/visual-adjustments.capture.mjs",
+    "test:photos": "firebase emulators:exec --config firebase.test.json --project demo-dispensalud-web --only auth,firestore \"node --test tests/photos.browser.test.mjs\""
   },
   "dependencies": {
     "firebase": "13.3.0"

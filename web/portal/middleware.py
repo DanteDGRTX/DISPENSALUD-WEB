@@ -12,7 +12,7 @@ class BrowserSecurityMiddleware:
             firebase_connections += " http://127.0.0.1:9098 http://127.0.0.1:8089 http://localhost:9098 http://localhost:8089"
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; script-src 'self'; style-src 'self'; "
-            "img-src 'self' data:; font-src 'self'; connect-src 'self'" + firebase_connections + "; "
+            "img-src 'self' blob: data:; font-src 'self'; connect-src 'self'" + firebase_connections + "; "
             "object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
         )
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"

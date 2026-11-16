@@ -63,3 +63,10 @@ capturas reales del acceso, beneficios y portada completa en
 
 El código de la demo antigua permanece para consulta y pruebas bajo un URLconf
 histórico, fuera de las rutas activas. No se importan sus cuentas ni registros.
+
+Fotos privadas: usa «Foto» en una tarjeta de paciente o «Cambiar foto de perfil».
+Seleccionar solo previsualiza; «Subir foto» confirma el envío. Los errores permiten
+reintentar sin perder la selección. La imagen se obtiene con token Firebase y se
+guarda fuera de los estáticos. No se cambian `foto:null` ni las reglas Firestore.
+Contrato y límites en [FOTOS_PRIVADAS_CONTRATO.md](../docs/FOTOS_PRIVADAS_CONTRATO.md);
+prueba local reproducible: `npm run test:photos` (solo emuladores).

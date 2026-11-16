@@ -10,6 +10,7 @@
 body[data-workspace="true"]>.integration-footer{display:none}
 /* Scale rem-based headings and controls along with the inherited workspace text. */
 html.large-type{font-size:19px}
+.web-workspace .avatar img,.photo-preview img{width:100%;height:100%;object-fit:cover;border-radius:inherit}.web-workspace .profile-avatar{width:88px;height:88px}.photo-preview{width:120px;height:120px;border-radius:50%;background:#123853;color:#84dbff;display:grid;place-items:center;font-size:2rem;margin-bottom:20px;overflow:hidden}.private-photo-editor input[type=file]{display:block;max-width:100%;margin:12px 0}.photo-actions{display:flex;flex-wrap:wrap;gap:12px}.photo-status{margin-top:18px;overflow-wrap:anywhere}
 @media(max-width:760px){.large-type .web-workspace .filters{grid-template-columns:minmax(0,1fr)}}
 
 /* Contextual action icons retain their text labels. */

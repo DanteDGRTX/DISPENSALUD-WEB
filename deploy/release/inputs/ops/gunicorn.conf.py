@@ -1,0 +1,26 @@
+"""One conservative synchronous worker; no optional worker dependencies."""
+bind = "127.0.0.1:8002"
+workers = 1
+worker_class = "sync"
+threads = 1
+preload_app = False
+backlog = 32
+timeout = 30
+graceful_timeout = 15
+keepalive = 2
+max_requests = 500
+max_requests_jitter = 50
+limit_request_line = 4094
+limit_request_fields = 50
+limit_request_field_size = 8190
+worker_tmp_dir = "/run/dispensalud-web"
+forwarded_allow_ips = "127.0.0.1"
+secure_scheme_headers = {"X-FORWARDED-PROTO": "https"}
+accesslog = None
+errorlog = "-"
+loglevel = "warning"
+capture_output = False
+reload = False
+control_socket_disable = True
+dirty_workers = 0
+umask = 0o077

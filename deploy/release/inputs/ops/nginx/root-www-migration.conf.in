@@ -1,0 +1,48 @@
+# REVIEW TEMPLATE ONLY. Not a new vhost to enable alongside the existing root/www.
+# Merge ONLY into existing dispensalud.site/www server blocks, after inventory,
+# backup and explicit final migration authorization. Preserve all other directives,
+# existing ACME routes, listen options, certificates and the four AgroSmart hosts.
+# Replace placeholders with EXISTING verified certificate paths; never the app cert.
+# If the root blocks are in a protected file, stop and resolve the file/block scope
+# before editing. Never replace a shared file wholesale.
+server {
+    listen 80;
+    server_name dispensalud.site www.dispensalud.site;
+    # Preserve any existing /.well-known/acme-challenge/ location verbatim here.
+    location / { return 301 https://www.dispensalud.site$request_uri; }
+}
+server {
+    listen 443 ssl;
+    server_name dispensalud.site;
+    ssl_certificate __EXISTING_ROOT_WWW_FULLCHAIN__;
+    ssl_certificate_key __EXISTING_ROOT_WWW_PRIVKEY__;
+    location / { return 301 https://www.dispensalud.site$request_uri; }
+}
+server {
+    listen 443 ssl;
+    server_name www.dispensalud.site;
+    ssl_certificate __EXISTING_ROOT_WWW_FULLCHAIN__;
+    ssl_certificate_key __EXISTING_ROOT_WWW_PRIVKEY__;
+    client_max_body_size 2m;
+    # Preserve the existing logging and ACME directives for this block.
+    location /static/ {
+        alias /srv/dispensalud-web/current/web/staticfiles/;
+        add_header Cache-Control "public, max-age=300";
+        add_header X-Content-Type-Options nosniff;
+    }
+    location / {
+        proxy_pass http://127.0.0.1:8002;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Host "";
+        proxy_set_header Forwarded "";
+        proxy_connect_timeout 5s;
+        proxy_read_timeout 35s;
+        proxy_send_timeout 30s;
+        proxy_max_temp_file_size 0;
+    }
+}

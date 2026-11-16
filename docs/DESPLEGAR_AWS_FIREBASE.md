@@ -1,5 +1,11 @@
 # Preparación AWS — NO ejecutada
 
+La receta vigente para fotos privadas está en `deploy/release/prepare_release.py`
+y sus entradas `deploy/release/inputs`: unidad **dispensalud-web.service**, un
+worker en **127.0.0.1:8002**, validación app y migración delimitada raíz/www.
+Los ejemplos antiguos siguientes de puerto 8000/dos workers no se usan en el
+paquete actual. Ver `FOTOS_PRIVADAS_CONTRATO.md`; shared conserva las imágenes.
+
 Este documento prepara la versión Django + Firebase, no la antigua demo Java.
 No se accedió ni cambió AWS, DreamHost, DNS, reglas Firebase o sitios del equipo.
 La IP de la captura **3.139.210.116 no se ha verificado**. No se afirma que esté

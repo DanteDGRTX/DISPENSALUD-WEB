@@ -1,9 +1,14 @@
 from django.urls import path
 
 from portal import views, firebase_views as firebase
+from portal.private_photos import views as photos
 
 
 urlpatterns = [
+    path("api/photos/v1/", photos.index),
+    path("api/photos/v1/profile/", photos.subject),
+    path("api/photos/v1/patients/<str:patient_id>/", photos.subject),
+    path("api/photos/v1/files/<str:photo_id>/", photos.file),
     path("salud/", firebase.health, name="health"),
     path("", views.home, name="home"),
     path("panel/", firebase.shell, name="dashboard"),
