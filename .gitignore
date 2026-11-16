@@ -24,3 +24,25 @@ staticfiles/
 previews/design-correction/
 /previews/design-original-login-desktop.png
 /previews/visual-final/
+# Identidad, datos y artefactos privados: también se revisa el historial antes de publicar.
+*.pem
+*.ppk
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+google-services*.json
+*service-account*.json
+*service_account*.json
+*firebase-adminsdk*.json
+*.sqlite3
+*.db-wal
+*.db-shm
+*.db-journal
+*.sqlite3-journal
+.aws/
+credentials/
+*.apk
+*.aab
+*.tar.gz

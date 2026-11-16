@@ -34,6 +34,18 @@ Genera fuera del repositorio una release del commit exacto, con frontend compila
 Windows, imágenes privadas excluidas y wheels fijados para Linux/Python 3.14 en
 x86_64/aarch64. Instrucciones nuevas preservan shared y los servicios AgroSmart.
 
-Android se trabaja a continuación con commit propio. La ejecución cruzada del
-APK y los artefactos finales se informarán por separado; este registro no acredita
-producción. No se conectó a AWS, no se publicaron reglas ni se activó Storage/Blaze.
+## Cierre de la prueba cruzada y confirmación manual posterior
+
+Android cerró en `0689ec0` (implementación `335ce1a`). Se ejecutaron dos pruebas
+instrumentadas en Small_Phone con navegador real y emuladores Firebase: Android
+subió perfil y paciente ficticios y web verificó sus imágenes; web sustituyó ambas
+y Android verificó referencia/píxeles, borrado y aislamiento entre cuentas. Tras
+detener/reinstalar con `install -r`, se recuperó la foto desde caché privada sin
+conexión al servidor de fotos y se conservó el PNG local anterior. Suite JVM:
+151 declaradas, 150 correctas y una omitida que necesita Firestore Emulator.
+
+El 16/11/2026 el usuario confirmó que la última versión de fotos estaba instalada
+en AWS y que su prueba manual entre Android y https://www.dispensalud.site fue
+correcta. Se registra como confirmación del usuario, separada de los resultados
+locales. La publicación privada GitHub no conecta con AWS ni repite la prueba
+remota, modifica reglas, activa Storage/Blaze o cambia infraestructura.

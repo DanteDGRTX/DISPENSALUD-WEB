@@ -1,9 +1,15 @@
 # Portal Dispensalud con Firebase
 
+Sitio público: https://www.dispensalud.site. Fuente personal privada:
+[DISPENSALUD-WEB](https://github.com/DanteDGRTX/DISPENSALUD-WEB), rama principal
+`feature/firebase-web`. [Estado y operación de la entrega](../docs/PUBLICACION_PRIVADA.md).
+
 Django sirve la portada, las pantallas y los estáticos. El SDK modular Firebase
 comparte Authentication y Firestore con Android. Los datos privados se autorizan
 por UID y correo verificado; no existe una sesión de negocio Django ni endpoints
-privilegiados. Spring Boot y Supabase no son necesarios para estas pantallas.
+privilegiados de negocio. La API de fotos privada sí valida ID tokens Firebase y
+propiedad del paciente en Django, sin permisos Admin. Spring Boot y Supabase no
+son necesarios para estas pantallas.
 
 Desde la raíz en PowerShell:
 
@@ -70,3 +76,8 @@ reintentar sin perder la selección. La imagen se obtiene con token Firebase y s
 guarda fuera de los estáticos. No se cambian `foto:null` ni las reglas Firestore.
 Contrato y límites en [FOTOS_PRIVADAS_CONTRATO.md](../docs/FOTOS_PRIVADAS_CONTRATO.md);
 prueba local reproducible: `npm run test:photos` (solo emuladores).
+
+El usuario confirmó el 16/11/2026 la instalación AWS y una prueba manual correcta
+de fotos Android ↔ web. No se repite ese recorrido durante la publicación GitHub.
+Para instalación nueva, actualización o reversión del servicio existente consultar
+la [guía específica](../docs/PUBLICACION_PRIVADA.md#instalación-actualización-y-reversión).
