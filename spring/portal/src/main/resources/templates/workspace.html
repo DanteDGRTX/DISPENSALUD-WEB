@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<body>
+<section th:fragment="content" class="spring-management" aria-label="Gestión de pacientes">
+  <div class="section-heading"><div><h1>Gestión de pacientes</h1><p>Los mismos pacientes de tu cuenta, disponibles también en Android.</p></div>
+    <button type="button" class="secondary" data-spring-refresh>Actualizar</button></div>
+  <p th:if="${error}" th:text="${error}" class="message error" role="alert"></p>
+  <p th:if="${!notice.isEmpty()}" th:text="${notice}" class="message success" role="status"></p>
+  <section class="surface">
+    <h2 th:text="${draft.id.isEmpty() ? 'Nuevo paciente' : 'Revisar edición pendiente'}">Nuevo paciente</h2>
+    <div th:replace="~{workspace :: patientForm(${draft})}"></div>
+  </section>
+  <p><span th:text="${patients.size()}">0</span> pacientes · <span th:text="${treatmentCount}">0</span> tratamientos registrados.</p>
+  <p th:if="${patients.isEmpty()}">Aún no has registrado pacientes en esta cuenta.</p>
+  <article th:each="patient : ${patients}" class="surface">
+    <h2 th:text="${patient.nombre}">Paciente</h2>
+    <p><span th:text="${patient.edad}">0</span> años · <span th:text="${patient.contactoEmergencia}">Contacto</span></p>
+    <p th:text="${patient.notas}">Notas</p>
+    <details><summary>Editar paciente</summary><div th:replace="~{workspace :: patientForm(${patient})}"></div></details>
+    <form data-spring-path="patients/delete">
+      <input type="hidden" name="id" th:value="${patient.id}">
+      <input type="hidden" name="revision" th:value="${patient.revision}">
+      <input type="hidden" name="mutationId" th:value="${patient.mutationId}">
+      <label><input type="checkbox" required> Confirmo la baja del paciente si no tiene tratamientos ni historial.</label>
+      <button type="submit" class="text-button danger">Dar de baja</button>
+    </form>
+  </article>
+  <section class="surface"><h2>Revisión de registros</h2>
+    <p>Busca horarios vencidos todavía pendientes y registros repetidos. No modifica tratamientos ni confirma tomas u omisiones.</p>
+    <form data-spring-path="supervision"><button type="submit">Revisar registros</button></form>
+    <div th:if="${report != null}" role="status">
+      <p th:if="${report.findings.isEmpty()}">La revisión no encontró pendientes vencidas ni repeticiones entre los registros consultados.</p>
+      <ul th:unless="${report.findings.isEmpty()}"><li th:each="finding : ${report.findings}" th:text="${finding.description}">Observación</li></ul>
+    </div>
+  </section>
+</section>
+<form th:fragment="patientForm(form)" data-spring-path="patients" class="spring-patient-form">
+  <input type="hidden" name="id" th:value="${form.id}">
+  <input type="hidden" name="revision" th:value="${form.revision}">
+  <input type="hidden" name="mutationId" th:value="${form.mutationId}">
+  <label>Nombre completo<input class="form-control" name="nombre" required maxlength="120" th:value="${form.nombre}"></label>
+  <label>Edad<input class="form-control" name="edad" type="number" min="0" max="130" required th:value="${form.edad}"></label>
+  <label>Contacto de emergencia<input class="form-control" name="contactoEmergencia" required maxlength="200" th:value="${form.contactoEmergencia}"></label>
+  <label>Notas<textarea class="form-control" name="notas" maxlength="4000" rows="3" th:text="${form.notas}"></textarea></label>
+  <button type="submit">Guardar paciente</button>
+</form>
+</body></html>

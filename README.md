@@ -1,5 +1,15 @@
 # DispenSalud
 
+## Integración para Desarrollo de Aplicaciones Web · 19 noviembre 2026
+
+La rama de integración incorpora gestión de pacientes con Spring MVC/Thymeleaf,
+capas y puertos/adaptadores, y un segundo servicio de supervisión por agentes
+reactivos. Usa las cuentas y el contrato Firebase existentes. Arranque:
+`./scripts/Start-Course.ps1` en Windows o `bash scripts/start-course.sh` en Linux.
+Guía, evidencias de arquitectura y recorrido de exposición en
+[SPRING_CURSO.md](docs/SPRING_CURSO.md). Esta integración todavía no está desplegada.
+
+
 ## Versión final Firebase y fotos privadas · 16 noviembre 2026
 
 Web pública: **https://www.dispensalud.site**. Repositorio personal privado:
@@ -109,3 +119,4 @@ publicación Android en Play Store con firma de distribución y revisión de
 privacidad. El APK de la Release Android sigue siendo un prototipo debug de
 pruebas. Los apartados Spring Boot anteriores se conservan como historia y no
 deben usarse para configurar la web Firebase desplegada.
+

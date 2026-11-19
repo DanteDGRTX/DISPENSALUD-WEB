@@ -90,3 +90,15 @@ PRIVATE_PHOTO_ROOT = DATA_DIR / "private-photos"
 PRIVATE_PHOTO_UID_BYTES = 8 * 1024 * 1024
 PRIVATE_PHOTO_TOTAL_BYTES = 128 * 1024 * 1024
 PRIVATE_PHOTO_UID_COUNT = 64
+
+
+# Optional Spring management service; the public Firebase portal works without it.
+from urllib.parse import urlsplit
+SPRING_API_URL = os.environ.get("DISPENSALUD_SPRING_URL", "").rstrip("/")
+if SPRING_API_URL:
+    spring_uri = urlsplit(SPRING_API_URL)
+    if (spring_uri.scheme != "http" or spring_uri.hostname != "127.0.0.1" or
+            spring_uri.username or spring_uri.password or spring_uri.path or spring_uri.query or spring_uri.fragment):
+        raise ImproperlyConfigured("DISPENSALUD_SPRING_URL debe ser un servicio HTTP en loopback 127.0.0.1.")
+    if FIREBASE_EMULATORS:
+        raise ImproperlyConfigured("Spring verifica Firebase real; no mezclar con el modo emulador de la web.")

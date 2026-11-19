@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "node build.mjs",
-    "test": "node --test tests/contract.test.mjs",
+    "test": "node --test tests/contract.test.mjs tests/spring-client.test.mjs",
     "test:emulator": "firebase emulators:exec --config firebase.test.json --project demo-dispensalud-web --only auth,firestore \"node --test tests/firestore.test.mjs\"",
     "test:browser": "firebase emulators:exec --config firebase.test.json --project demo-dispensalud-web --only auth,firestore \"node --test tests/design.browser.test.mjs\"",
     "test:visual": "node tests/design.capture.mjs",
