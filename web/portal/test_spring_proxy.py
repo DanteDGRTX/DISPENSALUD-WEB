@@ -32,7 +32,7 @@ class SpringProxyTests(SimpleTestCase):
 
     def test_cross_origin_and_large_forms_are_rejected(self):
         self.assertEqual(self.client.get("/api/spring/workspace",HTTP_AUTHORIZATION="Bearer test-token",HTTP_ORIGIN="https://other.invalid").status_code,403)
-        response=self.client.post("/api/spring/patients",data="x="+"z"*17000,content_type="application/x-www-form-urlencoded",HTTP_AUTHORIZATION="Bearer test-token")
+        response=self.client.post("/api/spring/patients",data="x="+"z"*70000,content_type="application/x-www-form-urlencoded",HTTP_AUTHORIZATION="Bearer test-token")
         self.assertEqual(response.status_code,413)
 
     @override_settings(SPRING_API_URL="")

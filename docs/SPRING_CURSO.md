@@ -108,3 +108,12 @@ El frontend compilado también debe corresponder a estas fuentes. La web publica
 - Solo se admite el proyecto Firebase real configurado; los tokens sin firma de emulador no se aceptan en Java.
 - Las consultas Firestore siguen sujetas a reglas y cuotas publicadas.
 
+
+## Validación de esta entrega
+
+El workflow 44557984014 del commit b57f255 ejecutó correctamente 17 pruebas Java
+(6 del núcleo, 9 del portal y 2 de supervisión), 48 pruebas Django y 14 JS.
+Maven verify construyó los dos JAR y el build frontend produjo los estáticos.
+Los compilados incorporados se obtuvieron del artefacto de ese workflow,
+verificado por SHA-256. No se realizó una prueba con cuentas reales ni un
+despliegue AWS en esta sesión.

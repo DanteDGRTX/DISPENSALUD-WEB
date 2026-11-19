@@ -34,10 +34,10 @@ def forward(request, endpoint):
             size = int(request.headers.get("Content-Length", "0"))
         except ValueError:
             size = -1
-        if size < 0 or size > 16384:
+        if size < 0 or size > 65536:
             return JsonResponse({"error": "Formulario demasiado grande."}, status=413)
-        body = request.read(16385)
-        if len(body) > 16384 or len(body) != size:
+        body = request.read(65537)
+        if len(body) > 65536 or len(body) != size:
             return JsonResponse({"error": "Formulario no válido."}, status=413)
         headers["Content-Type"] = "application/x-www-form-urlencoded"
     upstream = Request(settings.SPRING_API_URL + "/" + endpoint, data=body, headers=headers, method=request.method)
