@@ -4,11 +4,13 @@ import {initializeFirestore,memoryLocalCache,connectFirestoreEmulator,terminate}
 import {firebaseConfig} from './firebase-config.js';
 import {AccountRepository} from './repository.js';
 import {PhotoClient,photoInitials} from './photos.js';
+import {SpringWorkspace} from './spring.js';
 import {accountView,workspaceView,roleChoices as webRoleChoices,svg} from './presentation.js';
 import {DomainError,ensure,validate,epochDay,dateInput,limaDay,limaInstant,timeInput,formatInstant,metrics,readableError} from './contract.js';
 
 const appEl=document.querySelector('#app'), dialog=document.querySelector('#editor');
-const emulator=JSON.parse(document.querySelector('#firebase-runtime').textContent).emulators;
+const runtime=JSON.parse(document.querySelector('#firebase-runtime').textContent);
+const emulator=runtime.emulators, springEnabled=runtime.springEnabled===true;
 const config=emulator ? {...firebaseConfig,projectId:'demo-dispensalud-web',apiKey:'demo-key',authDomain:'localhost'} : firebaseConfig;
 const app=initializeApp(config), auth=initializeAuth(app,{persistence:browserSessionPersistence});
 auth.languageCode='es';
@@ -18,6 +20,7 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const icon=(name,cls='')=>`<img class="${cls}" src="${assets}${name}" alt="" aria-hidden="true">`;
 const paths={panel:'/panel/',patients:'/pacientes/',treatments:'/tratamientos/',history:'/historial/',alerts:'/alertas/',device:'/equipo/',profile:'/perfil/',login:'/ingresar/',register:'/cuenta/crear/',reset:'/cuenta/recuperar/',verify:'/cuenta/verificar/'};
 const labels={panel:'Inicio',patients:'Pacientes',treatments:'Tratamientos',history:'Historial',alerts:'Alertas',device:'Mi equipo',profile:'Mi perfil'};
+if(springEnabled){paths.spring='/gestion/';labels.spring='Gestión de pacientes';}
 const statuses={PENDING:'Pendiente',TAKEN:'Toma registrada',LATE:'Toma tardía registrada',MISSED:'Omisión registrada'};
 const alertLabels={DOSIS_OMITIDA:'Dosis omitida',STOCK_BAJO:'Stock bajo',BATERIA_BAJA:'Batería baja',DESCONECTADO:'Desconectado'};
 let page=document.body.dataset.page, session=null, generation=0, authBusy=false, busy=false, error='',notice='',data=null,selected='',filters={q:'',status:'',from:'',until:'',alert:''},loadedAt=null;
@@ -43,7 +46,7 @@ function renderAuth(){
   appEl.innerHTML=accountView({mode,email:current?.email,title,banner:banner(),form,profile:accessProfile});
   setBusy(authBusy);
 }
-function setBusy(value){appEl.querySelectorAll('button,input,select').forEach(el=>{el.disabled=value;});appEl.setAttribute('aria-busy',String(value));}
+function setBusy(value){appEl.querySelectorAll('button,input,select').forEach(el=>{if(value){if(!Object.hasOwn(el.dataset,'busyDisabled'))el.dataset.busyDisabled=String(el.disabled);el.disabled=true;}else if(Object.hasOwn(el.dataset,'busyDisabled')){el.disabled=el.dataset.busyDisabled==='true';delete el.dataset.busyDisabled;}});appEl.setAttribute('aria-busy',String(value));}
 function activeRows(kind){return (data?.[kind]??[]).filter(d=>!d.deleted);}
 function patients(){return activeRows('patients');}
 function patientName(id){return patients().find(p=>p.id===id)?.body.nombre??'Paciente no disponible';}
@@ -70,19 +73,20 @@ function renderWorkspace(){
   if(!data){appEl.innerHTML=`<section class="loading"><span class="spinner"></span><h1>${error?'No se pudieron cargar los datos':'Cargando tu cuenta…'}</h1>${banner()}<button class="btn btn-outline" data-action="logout">Cerrar sesión</button></section>`;return;}
   if(selected&&!patients().some(p=>p.id===selected))selected='';
   const profile=activeRows('preferences').find(p=>p.id==='presentation')?.body.profile??'Usuario';
-  const body={panel:dashboard,patients:patientsPage,treatments:treatmentsPage,history:historyPage,alerts:alertsPage,profile:profilePage,device:()=>`<div class="page-heading"><div><p class="eyebrow">TU DISPENSADOR</p><h1>Mi equipo</h1></div></div><section class="surface device-card"><div><h2>Sin dispositivo vinculado</h2><p>La vinculación y la integración física no están disponibles en esta versión.</p><p class="fine-print">Puedes organizar tratamientos y registrar dosis manualmente. La imagen del producto no indica una conexión física.</p></div><img src="/static/portal/product/images/pillbox-transparent.png" width="629" height="397" alt="Dispensador Dispensalud PillBox Pro"></section>`}[page]??dashboard;
+  const body={spring:()=>springEnabled?'<section data-spring-root><p role="status">Cargando gestión de pacientes…</p></section>':empty('Gestión no habilitada','Inicia la integración para abrir esta sección.'),panel:dashboard,patients:patientsPage,treatments:treatmentsPage,history:historyPage,alerts:alertsPage,profile:profilePage,device:()=>`<div class="page-heading"><div><p class="eyebrow">TU DISPENSADOR</p><h1>Mi equipo</h1></div></div><section class="surface device-card"><div><h2>Sin dispositivo vinculado</h2><p>La vinculación y la integración física no están disponibles en esta versión.</p><p class="fine-print">Puedes organizar tratamientos y registrar dosis manualmente. La imagen del producto no indica una conexión física.</p></div><img src="/static/portal/product/images/pillbox-transparent.png" width="629" height="397" alt="Dispensador Dispensalud PillBox Pro"></section>`}[page]??dashboard;
   const sync=`<span class="small-dot ${error||!navigator.onLine?'warning':''}"></span><span>${busy?'Escritura pendiente de confirmación':!navigator.onLine?'Sin conexión · Ediciones deshabilitadas':error?'Error · Requiere revisión':`Datos cargados del servidor${loadedAt?' · '+timeInput(loadedAt):''}`}</span><span class="zone">Hora de Perú</span>`;
   const selector=`<label for="patient-select">Paciente seleccionado</label><select class="form-select" id="patient-select"><option value="">Todos mis pacientes</option>${patients().map(p=>`<option value="${p.id}" ${selected===p.id?'selected':''}>${esc(p.body.nombre)}</option>`).join('')}</select>${['panel','treatments'].includes(page)?`<button class="btn btn-outline-primary" data-action="plan" ${busy||!navigator.onLine?'disabled':''}>${svg('calendar')} Generar próximos 7 días</button>`:''}`;
   appEl.innerHTML=workspaceView({page,labels,urls:paths,profile,banner:banner()+(!navigator.onLine?'<p class="message">Necesitas conexión para editar. No se guardan cambios sin conexión en esta versión.</p>':''),sync,selector,content:body()});
   const panelRoot=appEl.querySelector('.app-content'),heading=panelRoot.querySelector(':scope>.page-heading,:scope>.section-heading,:scope>h1');if(heading)panelRoot.insertBefore(heading,panelRoot.querySelector('.sync-line'));
   appEl.querySelectorAll('button').forEach(button=>{if(!button.className)button.className='btn btn-primary';else if(button.classList.contains('secondary'))button.classList.add('btn','btn-outline-primary');});
   session.photos.hydrate(appEl);
+  if(page==='spring'&&springEnabled)session.spring.mount(appEl.querySelector('[data-spring-root]'));
   setBusy(busy);
   if(!navigator.onLine)appEl.querySelectorAll('[data-action^="new"],[data-action^="edit"],[data-action="manual"],[data-action="toggle-treatment"],[data-action="read-alert"],#profile-form button').forEach(button=>button.disabled=true);
 }
-function render(){if(dialog.open)return;try{if(authPages.includes(page)||!session)renderAuth();else renderWorkspace();}catch(e){error=readableError(e);appEl.innerHTML=`<section class="loading"><h1>No pudimos mostrar los datos</h1>${banner()}<button data-action="logout">Cerrar sesión</button></section>`;}}
+function render(){if(dialog.open||session?.spring?.busy)return;try{if(authPages.includes(page)||!session)renderAuth();else renderWorkspace();}catch(e){error=readableError(e);appEl.innerHTML=`<section class="loading"><h1>No pudimos mostrar los datos</h1>${banner()}<button data-action="logout">Cerrar sesión</button></section>`;}}
 
-async function closeSession(){announce('');generation++;const old=session;session=null;data=null;selected='';filters={q:'',status:'',from:'',until:'',alert:''};error='';notice='';loadedAt=null;dialog.close();dialog.replaceChildren();appEl.innerHTML='<section class="loading"><span class="spinner" aria-hidden="true"></span><h1>Restaurando tu sesión…</h1><p role="status">Comprobando el acceso a tu cuenta.</p></section>';if(old){old.photos?.close();old.repo.close();await terminate(old.db).catch(()=>{});await deleteApp(old.app).catch(()=>{});}}
+async function closeSession(){announce('');generation++;const old=session;session=null;data=null;selected='';filters={q:'',status:'',from:'',until:'',alert:''};error='';notice='';loadedAt=null;dialog.close();dialog.replaceChildren();appEl.innerHTML='<section class="loading"><span class="spinner" aria-hidden="true"></span><h1>Restaurando tu sesión…</h1><p role="status">Comprobando el acceso a tu cuenta.</p></section>';if(old){old.spring?.close();old.photos?.close();old.repo.close();await terminate(old.db).catch(()=>{});await deleteApp(old.app).catch(()=>{});}}
 async function activate(user){
   await closeSession(); const ticket=generation;
   if(!user){if(!['login','register','reset'].includes(page))navigate('login',true);else render();return;}
@@ -98,7 +102,7 @@ async function activate(user){
     if(emulator)connectFirestoreEmulator(db,'127.0.0.1',8089);
     if(ticket!==generation||auth.currentUser?.uid!==user.uid){await terminate(db);await deleteApp(scopedApp);return;}
     const repo=new AccountRepository(db,user.uid,()=>ticket===generation && auth.currentUser?.uid===user.uid && auth.currentUser?.emailVerified);
-    session={app:scopedApp,db,repo,ticket,photos:new PhotoClient(auth,user.uid)};if(authPages.includes(page))navigate('panel',true);else render();
+    session={app:scopedApp,db,repo,ticket,photos:new PhotoClient(auth,user.uid),spring:springEnabled?new SpringWorkspace(auth,user.uid):null};if(authPages.includes(page))navigate('panel',true);else render();
     await refresh();
     if(ticket!==generation)return;
     const pendingProfile=sessionStorage.getItem('dispensalud-profile-'+user.uid);
@@ -160,7 +164,7 @@ appEl.addEventListener('submit',async e=>{
 });
 appEl.addEventListener('click',async e=>{
   const role=e.target.closest('[data-profile]');if(role){e.preventDefault();accessProfile=role.dataset.profile;renderAuth();return;}
-  const link=e.target.closest('[data-nav]');if(link){e.preventDefault();if(authBusy)return;filters={q:'',status:'',from:'',until:'',alert:''};navigate(link.dataset.nav);return;}
+  const link=e.target.closest('[data-nav]');if(link){e.preventDefault();if(authBusy||session?.spring?.busy)return;filters={q:'',status:'',from:'',until:'',alert:''};navigate(link.dataset.nav);return;}
   const button=e.target.closest('[data-action]');if(!button||busy||authBusy)return;const {action,id}=button.dataset;
   try{
     if(action==='logout'){await closeSession();await signOut(auth);navigate('login',true);}
@@ -182,8 +186,9 @@ appEl.addEventListener('change',e=>{if(e.target.id==='patient-select'){selected=
 dialog.addEventListener('click',e=>{if(e.target.closest('[data-close]')&&!dialog.querySelector('form')?.dataset.pending){dialog.close();dialog.replaceChildren();render();}});
 dialog.addEventListener('cancel',e=>{if(dialog.querySelector('form')?.dataset.pending)e.preventDefault();});
 dialog.addEventListener('close',()=>session?.photos.clearEditors());
-window.addEventListener('popstate',()=>{if(busy)return;dialog.close();dialog.replaceChildren();page=Object.keys(paths).find(p=>paths[p]===location.pathname)??'panel';filters={q:'',status:'',from:'',until:'',alert:''};render();});
+window.addEventListener('popstate',()=>{if(busy)return;session?.spring?.cancel();dialog.close();dialog.replaceChildren();page=Object.keys(paths).find(p=>paths[p]===location.pathname)??'panel';filters={q:'',status:'',from:'',until:'',alert:''};render();});
 window.addEventListener('online',()=>{if(!dialog.open)render();});window.addEventListener('offline',()=>{if(!dialog.open)render();announce('Sin conexión. Necesitas Internet para editar.');});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){appEl.querySelectorAll('input[type="password"]').forEach(i=>i.value='');}else if(auth.currentUser&&!auth.currentUser.emailVerified&&!authBusy)activate(auth.currentUser);});
 onAuthStateChanged(auth,user=>{if(!authBusy)activate(user);});
 setInterval(()=>{if(session&&data&&!busy&&!dialog.open&&!document.hidden&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))render();},30000);
+

@@ -2,9 +2,12 @@ from django.urls import path
 
 from portal import views, firebase_views as firebase
 from portal.private_photos import views as photos
+from portal import spring_proxy
 
 
 urlpatterns = [
+    path("gestion/", firebase.shell, {"page": "spring"}, name="spring_management"),
+    path("api/spring/<path:endpoint>", spring_proxy.forward),
     path("api/photos/v1/", photos.index),
     path("api/photos/v1/profile/", photos.subject),
     path("api/photos/v1/patients/<str:patient_id>/", photos.subject),
@@ -24,3 +27,4 @@ urlpatterns = [
     path("equipo/", firebase.shell, {"page":"device"}, name="device"),
     path("perfil/", firebase.shell, {"page":"profile"}, name="profile"),
 ]
+
